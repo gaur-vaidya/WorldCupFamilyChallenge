@@ -254,7 +254,7 @@ firebase.initializeApp({
   appId:             "1:124138994777:web:b16c6cd83098bab2874548"
 });
 const db       = firebase.firestore();
-const PRED_DOC = db.collection('wcfc').doc('predictions');
+const PRED_DOC = db.collection('wcfc').doc('gaurvaidya_fam_wc2026_x7q');
 
 let predCache = {};  // live in-memory predictions, kept current by onSnapshot
 let _predTimer;      // debounce Firestore writes
