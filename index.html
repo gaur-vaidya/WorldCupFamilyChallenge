@@ -434,12 +434,12 @@ async function fetchMatches(force=false) {
 }
 
 // ── TIME ─────────────────────────────────────────────────────
-function toIST(utc) { const d=new Date(utc); return new Date(d.getTime()+(5.5*60-d.getTimezoneOffset())*60000); }
-function fmtTime(utc)  { return toIST(utc).toLocaleString('en-IN',{hour:'2-digit',minute:'2-digit',hour12:true}); }
-function fmtDate(utc)  { return toIST(utc).toLocaleString('en-IN',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit',hour12:true}); }
-function isToday(utc)  { const d=toIST(utc),n=toIST(new Date().toISOString()); return d.toDateString()===n.toDateString(); }
+const IST = 'Asia/Kolkata';
+function fmtTime(utc)  { return new Date(utc).toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit',hour12:true,timeZone:IST}); }
+function fmtDate(utc)  { return new Date(utc).toLocaleString('en-IN',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit',hour12:true,timeZone:IST}); }
+function isToday(utc)  { return new Date(utc).toLocaleDateString('en-IN',{timeZone:IST}) === new Date().toLocaleDateString('en-IN',{timeZone:IST}); }
 function isLocked(utc) { return Date.now() >= new Date(utc).getTime()-15*60*1000; }
-function istHour(utc)  { const d=toIST(utc); return d.getHours()+d.getMinutes()/60; }
+function istHour(utc)  { const s=new Date(utc).toLocaleString('en-US',{hour:'numeric',minute:'numeric',hour12:false,timeZone:IST}); const [h,m]=s.split(':'); return +h+(+m)/60; }
 function timeAgo(iso) {
   if (!iso) return 'never';
   const m=Math.round((Date.now()-new Date(iso))/60000);
