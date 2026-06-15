@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <rect width="512" height="512" rx="110" fill="#0a0e1a"/>
+  <circle cx="256" cy="256" r="210" fill="#f0f0f0" stroke="#1a1a1a" stroke-width="18"/>
+  <!-- central pentagon -->
+  <polygon points="256,130 318,175 296,248 216,248 194,175" fill="#1a1a1a"/>
+  <!-- top-right -->
+  <polygon points="318,175 400,175 432,256 376,310 296,248" fill="none" stroke="#1a1a1a" stroke-width="14" stroke-linejoin="round"/>
+  <!-- bottom-right -->
+  <polygon points="376,310 400,390 316,440 256,390 296,248" fill="none" stroke="#1a1a1a" stroke-width="14" stroke-linejoin="round"/>
+  <!-- bottom-left -->
+  <polygon points="256,390 196,440 112,390 136,310 216,248" fill="none" stroke="#1a1a1a" stroke-width="14" stroke-linejoin="round"/>
+  <!-- top-left -->
+  <polygon points="136,310 80,256 112,175 194,175 216,248" fill="none" stroke="#1a1a1a" stroke-width="14" stroke-linejoin="round"/>
+  <!-- top -->
+  <polygon points="194,175 162,90 256,62 350,90 318,175" fill="none" stroke="#1a1a1a" stroke-width="14" stroke-linejoin="round"/>
+  <!-- fill side pentagons black -->
+  <polygon points="318,175 400,175 432,256 376,310 296,248" fill="#1a1a1a"/>
+  <polygon points="256,390 196,440 112,390 136,310 216,248" fill="#1a1a1a"/>
+  <polygon points="194,175 162,90 256,62 350,90 318,175" fill="#1a1a1a"/>
+</svg>

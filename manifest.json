@@ -1,0 +1,12 @@
+{
+  "name": "World Cup Family Challenge",
+  "short_name": "WC Family",
+  "description": "FIFA 2026 World Cup family prediction game",
+  "start_url": "/WorldCupFamilyChallenge/",
+  "display": "standalone",
+  "background_color": "#0a0e1a",
+  "theme_color": "#0a0e1a",
+  "icons": [
+    { "src": "favicon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
+}
