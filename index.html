@@ -303,10 +303,12 @@ const KNOCKOUT = new Set(['FINAL','THIRD_PLACE','SEMI_FINALS','QUARTER_FINALS'])
 const API_BASE  = 'https://api.football-data.org/v4';
 // When served via server.js (localhost or LAN IP), use the local proxy — no CORS issues.
 // When opened as a plain file, fall back to public CORS proxies.
-const ON_SERVER = location.protocol !== 'file:';
-const PROXIES   = ON_SERVER
-  ? [ url => url.replace(API_BASE, '/api') ]          // local proxy (server.js)
-  : [                                                  // public CORS proxies (fallback)
+// Use local proxy only when running via server.js on this machine
+const ON_SERVER = ['localhost','127.0.0.1'].includes(location.hostname)
+               || location.hostname.startsWith('192.168.');
+const PROXIES = ON_SERVER
+  ? [ url => url.replace(API_BASE, '/api') ]   // server.js handles CORS
+  : [                                           // public CORS proxies for GitHub Pages
       url => `https://corsproxy.io/?${url}`,
       url => `https://api.codetabs.com/v1/proxy?quest=${url}`,
       url => `https://cors.eu.org/${url}`,
