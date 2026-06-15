@@ -596,7 +596,7 @@ function togglePredGroup(gid,gname){
 }
 function predRow(m,preds){
   const locked=isLocked(m.utcDate),done=m.status==='FINISHED',mp=preds[m.id]||{};
-  const hn=m.homeTeam?.tla||m.homeTeam?.shortName||'?',an=m.awayTeam?.tla||m.awayTeam?.shortName||'?';
+  const hn=m.homeTeam?.shortName||m.homeTeam?.name||m.homeTeam?.tla||'?',an=m.awayTeam?.shortName||m.awayTeam?.name||m.awayTeam?.tla||'?';
   const ft=m.score?.fullTime;
   return `<tr>
     <td style="white-space:nowrap;min-width:140px">
