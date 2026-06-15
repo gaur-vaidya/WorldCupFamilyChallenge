@@ -74,9 +74,19 @@ body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; backg
 .ftab.on { background:var(--gold); border-color:var(--gold); color:#0a0e1a; }
 
 /* Predictions */
+.pred-filter-bar { display:flex; gap:8px; margin-bottom:16px; position:sticky; top:92px; z-index:20; background:var(--bg); padding:6px 0; }
+.pred-filter-btn { padding:6px 18px; border-radius:20px; border:1px solid var(--border); background:var(--bg-card); color:var(--text2); font-size:.8rem; font-weight:600; cursor:pointer; transition:all .15s; }
+.pred-filter-btn.active { background:var(--gold); border-color:var(--gold); color:#0a0e1a; }
+.pred-group-hdr { display:flex; align-items:center; justify-content:space-between; padding:12px 20px; font-size:.7rem; font-weight:700; text-transform:uppercase; letter-spacing:.08em; color:var(--text2); border-bottom:1px solid var(--border); }
+.pred-group-hdr.clickable { cursor:pointer; }
+.pred-group-hdr.clickable:hover { background:var(--bg-card2); color:var(--text); }
+.group-badge { font-size:.62rem; font-weight:600; padding:2px 8px; border-radius:10px; background:var(--bg-card2); color:var(--text3); text-transform:none; letter-spacing:0; }
+.group-badge.done { background:#27c93f18; color:var(--green); }
 .pred-table { width:100%; border-collapse:collapse; }
-.pred-table th { padding:10px; text-align:left; font-size:.68rem; text-transform:uppercase; letter-spacing:.07em; color:var(--text3); border-bottom:1px solid var(--border); white-space:nowrap; }
-.pred-table td { padding:10px; border-bottom:1px solid #151e30; vertical-align:middle; }
+.pred-table th { padding:10px 10px 10px 12px; text-align:left; font-size:.68rem; text-transform:uppercase; letter-spacing:.07em; color:var(--text3); border-bottom:1px solid var(--border); white-space:nowrap; }
+.pred-table th:first-child { padding-left:20px; } .pred-table td:first-child { padding-left:20px; }
+.pred-table th:last-child { padding-right:20px; } .pred-table td:last-child { padding-right:20px; }
+.pred-table td { padding:10px 10px 10px 12px; border-bottom:1px solid #151e30; vertical-align:middle; }
 .pred-inputs { display:flex; align-items:center; gap:4px; }
 .score-inp { width:36px; text-align:center; background:var(--bg); border:1px solid var(--border); color:var(--text); padding:6px 2px; border-radius:6px; font-size:.9rem; font-weight:700; }
 .score-inp:focus { outline:none; border-color:var(--gold); }
@@ -530,17 +540,59 @@ function renderPreds(){
   const el=document.getElementById('predsOut');
   if(!matches.length){el.innerHTML='<div class="empty"><div class="ei">📝</div><div>No data — hit Sync first.</div></div>';return;}
   const preds=predCache;
+  const f=window._predFilter||'predict';
+  if(!window._expandedGroups) window._expandedGroups=new Set();
+
   const list=matches.filter(m=>!['POSTPONED','CANCELLED','SUSPENDED'].includes(m.status));
   const grouped={};
   list.forEach(m=>{const k=m.matchday?`Matchday ${m.matchday}`:stageLabel(m.stage,m.group);(grouped[k]=grouped[k]||[]).push(m);});
-  el.innerHTML=Object.entries(grouped).map(([g,ms])=>`
-    <div class="card" style="overflow-x:auto">
-      <div class="card-label">${g}</div>
-      <table class="pred-table">
-        <thead><tr><th>Match</th>${MEMBERS.map(w=>`<th style="color:var(--${CSS_CLS[w]})">${ICONS[w]} ${w}</th>`).join('')}</tr></thead>
-        <tbody>${ms.map(m=>predRow(m,preds)).join('')}</tbody>
-      </table>
-    </div>`).join('');
+
+  let html=`<div class="pred-filter-bar">
+    <button class="pred-filter-btn${f==='predict'?' active':''}" onclick="setPredFilter('predict')">⚽ To Predict</button>
+    <button class="pred-filter-btn${f==='all'?' active':''}" onclick="setPredFilter('all')">All Matches</button>
+  </div>`;
+
+  let hasContent=false;
+  for(const [g,ms] of Object.entries(grouped)){
+    const doneCnt=ms.filter(m=>m.status==='FINISHED').length;
+    const allDone=doneCnt===ms.length;
+    const rows=f==='predict'?ms.filter(m=>m.status!=='FINISHED'):ms;
+    if(f==='predict'&&!rows.length) continue;
+    hasContent=true;
+    const gid='pg_'+g.replace(/\W+/g,'_');
+    const collapsed=f==='all'&&allDone&&!window._expandedGroups.has(g);
+    const clickable=allDone&&f==='all';
+    html+=`<div class="card" style="overflow-x:auto;padding:0;margin-bottom:12px">
+      <div class="pred-group-hdr${clickable?' clickable':''}"${clickable?` onclick="togglePredGroup('${gid}','${g}')"`:''}">
+        <span>${g}</span>
+        <span style="display:flex;gap:8px;align-items:center">
+          ${doneCnt&&!allDone?`<span class="group-badge">${doneCnt}/${ms.length} done</span>`:''}
+          ${allDone?'<span class="group-badge done">✓ All done</span>':''}
+          ${clickable?`<span id="${gid}_icon" style="color:var(--text3);font-size:.75rem">${collapsed?'▶':'▼'}</span>`:''}
+        </span>
+      </div>
+      <div id="${gid}"${collapsed?' style="display:none"':''}>
+        <table class="pred-table">
+          <thead><tr><th>Match</th>${MEMBERS.map(w=>`<th style="color:var(--${CSS_CLS[w]})">${ICONS[w]} ${w}</th>`).join('')}</tr></thead>
+          <tbody>${rows.map(m=>predRow(m,preds)).join('')}</tbody>
+        </table>
+      </div>
+    </div>`;
+  }
+
+  if(!hasContent){
+    html+='<div class="empty"><div class="ei">🎉</div><div>All caught up! Switch to "All Matches" to review scores.</div></div>';
+  }
+  el.innerHTML=html;
+}
+function setPredFilter(f){window._predFilter=f;renderPreds();}
+function togglePredGroup(gid,gname){
+  const body=document.getElementById(gid),icon=document.getElementById(gid+'_icon');
+  if(!body)return;
+  const open=body.style.display==='none';
+  body.style.display=open?'':'none';
+  if(icon)icon.textContent=open?'▼':'▶';
+  if(open)window._expandedGroups.add(gname);else window._expandedGroups.delete(gname);
 }
 function predRow(m,preds){
   const locked=isLocked(m.utcDate),done=m.status==='FINISHED',mp=preds[m.id]||{};
