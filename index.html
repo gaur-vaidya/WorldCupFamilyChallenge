@@ -342,8 +342,31 @@ const FLAGS = {
   "Côte d'Ivoire":'🇨🇮','Ivory Coast':'🇨🇮','Mali':'🇲🇱','El Salvador':'🇸🇻',
   'Guatemala':'🇬🇹','Trinidad and Tobago':'🇹🇹','Cuba':'🇨🇺','Haiti':'🇭🇹',
   'China PR':'🇨🇳','China':'🇨🇳','Thailand':'🇹🇭','Vietnam':'🇻🇳','India':'🇮🇳',
+  'Kenya':'🇰🇪','Tanzania':'🇹🇿','Zambia':'🇿🇲','Zimbabwe':'🇿🇼','Angola':'🇦🇴',
+  'Congo':'🇨🇩','DR Congo':'🇨🇩','Burkina Faso':'🇧🇫','Mozambique':'🇲🇿',
+  'Nicaragua':'🇳🇮','Curaçao':'🇨🇼','Dominican Republic':'🇩🇴','Bermuda':'🇧🇲',
+  'Bahrain':'🇧🇭','Kuwait':'🇰🇼','Oman':'🇴🇲','Syria':'🇸🇾','Lebanon':'🇱🇧',
+  'Georgia':'🇬🇪','Kazakhstan':'🇰🇿','Kyrgyzstan':'🇰🇬','Tajikistan':'🇹🇯',
 };
-function flag(n) { return FLAGS[n] || '🏳️'; }
+// TLA → flag for reliable lookup regardless of API name variations
+const FLAGS_TLA = {
+  'ARG':'🇦🇷','BRA':'🇧🇷','FRA':'🇫🇷','GER':'🇩🇪','ESP':'🇪🇸','POR':'🇵🇹',
+  'ENG':'🏴󠁧󠁢󠁥󠁮󠁧󠁿','ITA':'🇮🇹','NED':'🇳🇱','BEL':'🇧🇪','CRO':'🇭🇷','URU':'🇺🇾',
+  'COL':'🇨🇴','MEX':'🇲🇽','USA':'🇺🇸','JPN':'🇯🇵','KOR':'🇰🇷','SEN':'🇸🇳',
+  'MAR':'🇲🇦','AUS':'🇦🇺','CAN':'🇨🇦','ECU':'🇪🇨','SUI':'🇨🇭','POL':'🇵🇱',
+  'SRB':'🇷🇸','DEN':'🇩🇰','WAL':'🏴󠁧󠁢󠁷󠁬󠁳󠁿','GHA':'🇬🇭','CMR':'🇨🇲','KSA':'🇸🇦',
+  'IRN':'🇮🇷','QAT':'🇶🇦','TUN':'🇹🇳','CRC':'🇨🇷','CIV':'🇨🇮','PAN':'🇵🇦',
+  'HON':'🇭🇳','VEN':'🇻🇪','TUR':'🇹🇷','AUT':'🇦🇹','SWE':'🇸🇪','NOR':'🇳🇴',
+  'UKR':'🇺🇦','NGA':'🇳🇬','EGY':'🇪🇬','ALG':'🇩🇿','RSA':'🇿🇦','NZL':'🇳🇿',
+  'JAM':'🇯🇲','PAR':'🇵🇾','BOL':'🇧🇴','HUN':'🇭🇺','CZE':'🇨🇿','SVK':'🇸🇰',
+  'SCO':'🏴󠁧󠁢󠁳󠁣󠁴󠁿','ROU':'🇷🇴','GRE':'🇬🇷','SVN':'🇸🇮','ALB':'🇦🇱','MKD':'🇲🇰',
+  'IRQ':'🇮🇶','UAE':'🇦🇪','JOR':'🇯🇴','UZB':'🇺🇿','IDN':'🇮🇩','MLI':'🇲🇱',
+  'SLV':'🇸🇻','GTM':'🇬🇹','TRI':'🇹🇹','CUB':'🇨🇺','HAI':'🇭🇹','CHN':'🇨🇳',
+  'THA':'🇹🇭','VIE':'🇻🇳','CHI':'🇨🇱','PER':'🇵🇪','GEO':'🇬🇪','KAZ':'🇰🇿',
+  'BHR':'🇧🇭','KUW':'🇰🇼','SYR':'🇸🇾','LIB':'🇱🇧','DOM':'🇩🇴','CUW':'🇨🇼',
+  'NCA':'🇳🇮','BER':'🇧🇲','CGO':'🇨🇬','COD':'🇨🇩','ANG':'🇦🇴','ZAM':'🇿🇲',
+};
+function flag(name, tla) { return FLAGS[name] || (tla && FLAGS_TLA[tla]) || ''; }
 
 // ── STORAGE ──────────────────────────────────────────────────
 function load() { try { return JSON.parse(localStorage.getItem(SK)||'{}'); } catch { return {}; } }
@@ -596,13 +619,17 @@ function togglePredGroup(gid,gname){
 }
 function predRow(m,preds){
   const locked=isLocked(m.utcDate),done=m.status==='FINISHED',mp=preds[m.id]||{};
-  const hn=m.homeTeam?.shortName||m.homeTeam?.name||m.homeTeam?.tla||'?',an=m.awayTeam?.shortName||m.awayTeam?.name||m.awayTeam?.tla||'?';
+  const htla=m.homeTeam?.tla||'',atla=m.awayTeam?.tla||'';
+  const hf=flag(m.homeTeam?.name,htla)||'🏳️', af=flag(m.awayTeam?.name,atla)||'🏳️';
+  const hn=m.homeTeam?.shortName||m.homeTeam?.name||htla||'?';
+  const an=m.awayTeam?.shortName||m.awayTeam?.name||atla||'?';
   const ft=m.score?.fullTime;
   return `<tr>
-    <td style="white-space:nowrap;min-width:140px">
-      <div style="font-weight:700;font-size:.83rem">${flag(m.homeTeam?.name)}${hn} vs ${flag(m.awayTeam?.name)}${an}</div>
-      <div style="font-size:.68rem;color:var(--text3)">${fmtDate(m.utcDate)} IST · ${stageLabel(m.stage,m.group)}</div>
-      ${done&&ft?`<div style="font-size:.78rem;color:var(--gold);font-weight:700">FT: ${ft.home}–${ft.away}</div>`:''}
+    <td style="min-width:160px">
+      <div style="font-weight:700;font-size:.9rem;line-height:1.5">${hf}${htla?` <span style="color:var(--text3);font-size:.72rem">(${htla})</span>`:''} <span style="color:var(--text3);font-weight:400">vs</span> ${af}${atla?` <span style="color:var(--text3);font-size:.72rem">(${atla})</span>`:''}</div>
+      <div style="font-size:.75rem;color:var(--text2);font-weight:600;margin-top:1px">${hn} vs ${an}</div>
+      <div style="font-size:.65rem;color:var(--text3);margin-top:2px">${fmtDate(m.utcDate)} IST · ${stageLabel(m.stage,m.group)}</div>
+      ${done&&ft?`<div style="font-size:.78rem;color:var(--gold);font-weight:700;margin-top:2px">FT: ${ft.home}–${ft.away}</div>`:''}
     </td>
     ${MEMBERS.map(w=>{
       const p=mp[w],pts=done?calcPts(p,m):null;
