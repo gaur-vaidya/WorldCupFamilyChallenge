@@ -205,6 +205,34 @@ body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; backg
   .pred-inputs { justify-content:center; }
 }
 
+/* Quiz */
+.quiz-who-bar { display:flex; gap:8px; margin-bottom:16px; }
+.quiz-who-btn { flex:1; padding:10px 6px; border-radius:10px; border:2px solid var(--border); background:var(--bg-card2); color:var(--text2); font-size:.82rem; font-weight:700; cursor:pointer; text-align:center; transition:all .15s; }
+.quiz-who-btn.dad.on { border-color:var(--dad); background:#4a9eff18; color:var(--dad); }
+.quiz-who-btn.mom.on { border-color:var(--mom); background:#ff79c618; color:var(--mom); }
+.quiz-who-btn.son.on { border-color:var(--son); background:#27c93f18; color:var(--son); }
+.quiz-card { background:var(--bg-card); border:1px solid var(--border); border-radius:12px; padding:20px; margin-bottom:14px; }
+.quiz-type { font-size:.65rem; font-weight:700; text-transform:uppercase; letter-spacing:.08em; color:var(--text3); margin-bottom:10px; }
+.quiz-q { font-size:1rem; font-weight:700; line-height:1.45; margin-bottom:16px; }
+.quiz-opts { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:12px; }
+.quiz-opt { padding:11px 10px; border-radius:8px; border:1px solid var(--border); background:var(--bg-card2); color:var(--text); font-size:.83rem; cursor:pointer; text-align:left; line-height:1.3; transition:all .12s; }
+.quiz-opt:not([disabled]):hover { border-color:var(--blue); color:var(--blue); }
+.quiz-opt.reveal-correct { background:#27c93f20; border-color:var(--green); color:var(--green); font-weight:700; pointer-events:none; }
+.quiz-opt.my-wrong { background:#ff5f5718; border-color:var(--red); color:var(--red); pointer-events:none; }
+.quiz-opt[disabled]:not(.reveal-correct):not(.my-wrong) { opacity:.45; pointer-events:none; }
+.quiz-result { font-size:.84rem; font-weight:700; margin-bottom:8px; }
+.quiz-result.ok { color:var(--green); } .quiz-result.ng { color:var(--red); }
+.quiz-badges { display:flex; gap:6px; flex-wrap:wrap; margin-top:8px; }
+.quiz-badge { font-size:.7rem; padding:3px 9px; border-radius:10px; font-weight:600; }
+.quiz-badge.ok { background:#27c93f18; color:var(--green); }
+.quiz-badge.ng { background:#ff5f5718; color:var(--red); }
+.quiz-badge.pending { background:var(--bg-card2); color:var(--text3); }
+.quiz-fact { background:#0a1a2e; border-left:3px solid var(--blue); padding:10px 14px; border-radius:0 8px 8px 0; font-size:.8rem; color:var(--text2); margin-top:12px; line-height:1.5; }
+.quiz-sc-row { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; }
+.quiz-sc { background:var(--bg-card2); border-radius:10px; padding:12px; text-align:center; }
+.quiz-sc-n { font-size:1.6rem; font-weight:800; }
+.quiz-sc-lbl { font-size:.65rem; color:var(--text2); margin-top:2px; }
+
 /* Passport */
 .passport-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(148px,1fr)); gap:12px; }
 .stamp { background:var(--bg-card2); border:2px solid var(--border); border-radius:12px; padding:14px; text-align:center; }
@@ -303,6 +331,7 @@ body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; backg
   <div class="tab" data-pg="predictions" onclick="go(this)">📝 Predictions</div>
   <div class="tab" data-pg="leaderboard" onclick="go(this)">🏆 Leaderboard</div>
   <div class="tab" data-pg="backup" onclick="go(this)">💾 Backup</div>
+  <div class="tab" data-pg="quiz" onclick="go(this)">🧠 Quiz</div>
   <div class="tab" data-pg="passport" onclick="go(this)">🌍 Passport</div>
   <div class="tab" data-pg="achievements" onclick="go(this)">🏅 Achievements</div>
   <div class="tab" data-pg="scrapbook" onclick="go(this)">📖 Scrapbook</div>
@@ -358,6 +387,11 @@ body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; backg
       <p style="color:var(--text2);font-size:.88rem;margin-bottom:14px">Clear all stored predictions. Cannot be undone.</p>
       <button class="btn btn-danger" onclick="doClear()">🗑 Clear Predictions</button>
     </div>
+  </div>
+
+  <div class="page" id="pg-quiz">
+    <div class="pg-title">🧠 Daily Quiz</div>
+    <div id="quizOut"></div>
   </div>
 
   <div class="page" id="pg-passport">
@@ -644,6 +678,7 @@ function render(pg) {
   else if (pg==='matches') renderMatches();
   else if (pg==='predictions') renderPreds();
   else if (pg==='leaderboard') renderLB();
+  else if (pg==='quiz') renderQuiz();
   else if (pg==='passport') renderPassport();
   else if (pg==='achievements') renderAch();
   else if (pg==='scrapbook') renderScrapbook();
@@ -900,6 +935,194 @@ async function init(){
   hideModal('modalKey');
   if(window.__MATCHES__?.length) { matches=window.__MATCHES__; render('dashboard'); }
   await syncData();
+}
+
+// ── QUIZ ─────────────────────────────────────────────────────
+
+const TRIVIA_QS = [
+  {q:"How many teams are in the 2026 World Cup?",opts:["32","40","48","64"],ans:2,fact:"WC 2026 expanded to 48 teams for the first time — up from 32 in previous editions!"},
+  {q:"Which 3 countries are co-hosting WC 2026?",opts:["USA, Brazil & Mexico","USA, Canada & Mexico","Canada, Mexico & Argentina","USA, UK & Canada"],ans:1,fact:"USA, Canada and Mexico share hosting duties across 16 cities — the first time 3 nations co-host!"},
+  {q:"Which country has won the most World Cups?",opts:["Germany","Argentina","Italy","Brazil"],ans:3,fact:"Brazil has won the World Cup 5 times — 1958, 1962, 1970, 1994 and 2002!"},
+  {q:"Which country won the 2022 World Cup in Qatar?",opts:["France","Brazil","Argentina","England"],ans:2,fact:"Argentina beat France on penalties in one of the greatest finals ever. Messi finally got his trophy!"},
+  {q:"How many players are on the pitch per team?",opts:["9","10","11","12"],ans:2,fact:"11 players per team including the goalkeeper — 22 players total on the pitch!"},
+  {q:"How long is a standard football match?",opts:["80 min","90 min","100 min","120 min"],ans:1,fact:"90 minutes split into two 45-minute halves. Extra time adds 30 more minutes if needed!"},
+  {q:"In which year was the first FIFA World Cup held?",opts:["1924","1928","1930","1934"],ans:2,fact:"The first World Cup was held in Uruguay in 1930. Uruguay won it on home soil!"},
+  {q:"Who scored the most goals in World Cup history?",opts:["Ronaldo","Pelé","Miroslav Klose","Gerd Müller"],ans:2,fact:"Miroslav Klose scored 16 World Cup goals across 4 tournaments for Germany — a record!"},
+  {q:"How many groups are there in WC 2026?",opts:["8","10","12","16"],ans:2,fact:"WC 2026 has 12 groups of 4 teams — the biggest group stage in World Cup history!"},
+  {q:"What is a 'hat-trick' in football?",opts:["3 goals by 3 different players","3 goals by one player in one match","Scoring in 3 consecutive matches","Winning 3-0"],ans:1,fact:"A hat-trick means one player scores 3 goals in a single match. Very rare and very exciting!"},
+  {q:"What trophy is given to the World Cup winner?",opts:["Golden Boot","FIFA Cup","World Cup Trophy","Champions Cup"],ans:2,fact:"The FIFA World Cup Trophy is made of 18-carat gold, stands 36cm tall and weighs 6.175 kg!"},
+  {q:"Which award goes to the tournament's top scorer?",opts:["Golden Glove","Golden Ball","Silver Boot","Golden Boot"],ans:3,fact:"The Golden Boot goes to the player who scores the most goals. Golden Ball is for best player!"},
+  {q:"What does FIFA stand for?",opts:["Football's International Fun Association","Fédération Internationale de Football Association","Football International Federation of Athletes","Fédération d'Internationale Football Assurance"],ans:1,fact:"FIFA is football's world governing body, founded in Paris on 21 May 1904!"},
+  {q:"How many substitutions can a team make in a WC match?",opts:["3","4","5","6"],ans:2,fact:"Teams can make up to 5 substitutions in normal time — a 6th is allowed in extra time!"},
+  {q:"What happens if a knockout match is level after 90 minutes?",opts:["Replay next day","Penalty shootout immediately","30 min extra time then penalties if needed","Coin flip"],ans:2,fact:"30 minutes of extra time is played first. If still level, it goes to a penalty shootout!"},
+  {q:"How far is the penalty spot from the goal?",opts:["8 yards","10 yards","12 yards","15 yards"],ans:2,fact:"The penalty spot is exactly 12 yards (11 metres) from the goal line!"},
+  {q:"Which city hosted the 2022 World Cup final?",opts:["Dubai","Doha","Riyadh","Abu Dhabi"],ans:1,fact:"The final was played at Lusail Stadium in Doha, Qatar — in front of 88,966 fans!"},
+  {q:"What colour card means a player is sent off?",opts:["Yellow","Orange","Red","Black"],ans:2,fact:"A red card means immediate dismissal! Two yellow cards in one match also equals a red!"},
+  {q:"How many teams qualify from each WC 2026 group?",opts:["1","2","3","4"],ans:1,fact:"Top 2 from each group qualify automatically, plus 8 best third-placed teams — 32 teams total in Round of 16!"},
+  {q:"What shape is a standard football pitch?",opts:["Square","Oval","Circle","Rectangle"],ans:3,fact:"A football pitch is rectangular — between 100-110m long and 64-75m wide for international matches!"},
+  {q:"Which country has appeared in the most World Cup finals?",opts:["Germany","Brazil","Italy","Argentina"],ans:0,fact:"Germany has appeared in 8 World Cup finals — winning 4 (1954, 1974, 1990, 2014)!"},
+  {q:"How many players can be in a WC squad?",opts:["23","25","26","28"],ans:2,fact:"From 2022, squads were expanded from 23 to 26 players — giving coaches more flexibility!"},
+  {q:"What is the name of WC 2026's official mascot?",opts:["Striker","Fuleco","Pique","Tazuni"],ans:3,fact:"Tazuni is the official mascot of WC 2026 — a penguin representing diversity and unity!"},
+  {q:"Which country has NEVER won a World Cup?",opts:["England","Argentina","Uruguay","France"],ans:0,fact:"England won in 1966 on home soil but haven't won since. They're still searching for a second title!"},
+  {q:"In football, what is the 'offside' rule about?",opts:["Being too far from your own goal","Running too fast","Being closer to opponent's goal than the ball and second-last defender","Touching the ball with your hand"],ans:2,fact:"Offside is one of football's most debated rules — you must have at least one opponent (usually the keeper) between you and the goal when the ball is played!"},
+];
+
+function seededRand(seed) {
+  let s = (seed ^ 0xdeadbeef) >>> 0;
+  return () => { s = Math.imul(s ^ (s >>> 15), s | 1); s ^= s + Math.imul(s ^ (s >>> 7), s | 61); return ((s ^ (s >>> 14)) >>> 0) / 0x100000000; };
+}
+
+function getQuizDateKey() {
+  return 'quiz_' + new Date().toLocaleDateString('en-CA', { timeZone: IST }); // YYYY-MM-DD
+}
+
+function getQuizAnswers() { return get(getQuizDateKey(), {}); }
+
+function saveQuizAnswer(qIdx, who, ansIdx, correct) {
+  const key = getQuizDateKey();
+  const d = get(key, {});
+  if (!d[`q${qIdx}`]) d[`q${qIdx}`] = {};
+  d[`q${qIdx}`][who] = { ans: ansIdx, correct };
+  set(key, d);
+}
+
+function getQuizTotals() {
+  const all = load();
+  const totals = { Dad: 0, Mom: 0, Son: 0 };
+  Object.entries(all).forEach(([k, v]) => {
+    if (!k.startsWith('quiz_') || typeof v !== 'object') return;
+    Object.values(v).forEach(qa => {
+      MEMBERS.forEach(w => { if (qa[w]?.correct) totals[w]++; });
+    });
+  });
+  return totals;
+}
+
+function buildDailyQuestions() {
+  const today = new Date().toLocaleDateString('en-CA', { timeZone: IST });
+  const seed = today.replace(/-/g,'').split('').reduce((a,c) => a*10 + +c, 0);
+  const rand = seededRand(seed);
+  const shuffle = arr => [...arr].sort(() => rand() - 0.5);
+
+  // ── Geography question ───────────────────────────────────────
+  const geoCountries = [...new Set(matches.flatMap(m => [m.homeTeam?.name, m.awayTeam?.name].filter(Boolean)))]
+    .filter(c => COUNTRY_DATA[c]);
+  const pool = geoCountries.length >= 4 ? geoCountries : Object.keys(COUNTRY_DATA).slice(0, 32);
+  const shuffledPool = shuffle(pool);
+  const country = shuffledPool[0];
+  const cd = COUNTRY_DATA[country];
+  const types = ['capital', 'continent', 'flag'];
+  const geoType = types[Math.floor(rand() * 3)];
+  let geoQ;
+
+  if (geoType === 'capital') {
+    const wrongs = shuffle(shuffledPool.slice(1).filter(c => COUNTRY_DATA[c].capital !== cd.capital)).slice(0, 3).map(c => COUNTRY_DATA[c].capital);
+    const opts = shuffle([cd.capital, ...wrongs]);
+    geoQ = { q:`🏛 What is the capital city of ${country}? ${flag(country)}`, opts, ans:opts.indexOf(cd.capital), fact:`${cd.capital} is the capital of ${country}, located in ${cd.continent}!` };
+  } else if (geoType === 'continent') {
+    const allC = ['Africa','Asia','Europe','North America','South America','Oceania'];
+    const opts = shuffle([cd.continent, ...shuffle(allC.filter(c => c!==cd.continent)).slice(0,3)]);
+    geoQ = { q:`🌍 Which continent/region does ${country} play from? ${flag(country)}`, opts, ans:opts.indexOf(cd.continent), fact:`${country} represents ${cd.continent}! Their capital is ${cd.capital}.` };
+  } else {
+    const others = shuffle(shuffledPool.slice(1).filter(c => flag(c))).slice(0, 3);
+    const teams = shuffle([country, ...others]);
+    geoQ = { q:`🚩 Which country owns this flag?  ${flag(country)}`, opts:teams.map(c => `${flag(c)} ${c}`), ans:teams.indexOf(country), fact:`That's the flag of ${country} (${cd.continent})! Capital: ${cd.capital}.` };
+  }
+
+  // ── Trivia question ──────────────────────────────────────────
+  const triviaIdx = Math.floor(rand() * TRIVIA_QS.length);
+  const triviaQ = TRIVIA_QS[triviaIdx];
+
+  return [
+    { type:'geo',    ...geoQ },
+    { type:'trivia', ...triviaQ },
+  ];
+}
+
+function answerQuiz(qIdx, optIdx) {
+  const who = window._quizWho || 'Dad';
+  const qs  = window._dailyQs;
+  if (!qs) return;
+  const answers = getQuizAnswers();
+  if (answers[`q${qIdx}`]?.[who]) return; // already answered
+  saveQuizAnswer(qIdx, who, optIdx, optIdx === qs[qIdx].ans);
+  renderQuiz();
+}
+
+function setQuizWho(who) { window._quizWho = who; renderQuiz(); }
+
+function renderQuiz() {
+  const el = document.getElementById('quizOut');
+  // Build / cache today's questions
+  const todayKey = getQuizDateKey();
+  if (!window._dailyQs || window._dailyQsKey !== todayKey) {
+    window._dailyQs    = buildDailyQuestions();
+    window._dailyQsKey = todayKey;
+  }
+  const qs      = window._dailyQs;
+  const answers = getQuizAnswers();
+  const who     = window._quizWho || 'Dad';
+  const totals  = getQuizTotals();
+  const dateStr = new Date().toLocaleDateString('en-IN', { weekday:'long', day:'numeric', month:'long', timeZone:IST });
+
+  el.innerHTML = `
+    <div class="card" style="margin-bottom:14px">
+      <div class="card-label">All-Time Quiz Scores</div>
+      <div class="quiz-sc-row">
+        ${MEMBERS.map(w=>`<div class="quiz-sc">
+          <div style="font-size:1.3rem">${ICONS[w]}</div>
+          <div class="quiz-sc-n" style="color:var(--${CSS_CLS[w]})">${totals[w]}</div>
+          <div class="quiz-sc-lbl">correct</div>
+        </div>`).join('')}
+      </div>
+    </div>
+
+    <div style="font-size:.78rem;color:var(--text2);margin-bottom:8px">📅 ${dateStr}</div>
+    <div style="font-size:.75rem;color:var(--text3);margin-bottom:10px">Select who's answering, then tap your answer. Each person answers once per question per day.</div>
+    <div class="quiz-who-bar">
+      ${MEMBERS.map(w=>`<button class="quiz-who-btn ${CSS_CLS[w]}${who===w?' on':''}" onclick="setQuizWho('${w}')">${ICONS[w]} ${w}</button>`).join('')}
+    </div>
+
+    ${qs.map((q,qi) => quizCard(q, qi, answers, who)).join('')}`;
+}
+
+function quizCard(q, qi, answers, who) {
+  const qAns   = answers[`q${qi}`] || {};
+  const myAns  = qAns[who];
+  const typeLabel = q.type==='geo' ? '🌍 Geography' : '⚽ WC Trivia';
+
+  const opts = q.opts.map((opt, i) => {
+    let cls = 'quiz-opt';
+    if (myAns) {
+      if (i === q.ans)         cls += ' reveal-correct';
+      else if (myAns.ans === i) cls += ' my-wrong';
+      else                      cls += '" disabled';
+    }
+    return `<button class="${cls}"${myAns?' disabled':''} onclick="answerQuiz(${qi},${i})">${opt}</button>`;
+  }).join('');
+
+  const resultHtml = myAns
+    ? `<div class="quiz-result ${myAns.correct?'ok':'ng'}">${myAns.correct ? '✅ Correct! +1 point' : `❌ Wrong — the answer was: ${q.opts[q.ans]}`}</div>`
+    : '';
+
+  const factHtml = myAns ? `<div class="quiz-fact">💡 ${q.fact}</div>` : '';
+
+  const badges = `<div class="quiz-badges">
+    ${MEMBERS.map(w => {
+      const a = qAns[w];
+      if (!a) return `<span class="quiz-badge pending">${ICONS[w]} ${w} ?</span>`;
+      return `<span class="quiz-badge ${a.correct?'ok':'ng'}">${ICONS[w]} ${w} ${a.correct?'✓':'✗'}</span>`;
+    }).join('')}
+  </div>`;
+
+  return `<div class="quiz-card">
+    <div class="quiz-type">${typeLabel}</div>
+    <div class="quiz-q">${q.q}</div>
+    <div class="quiz-opts">${opts}</div>
+    ${resultHtml}
+    ${badges}
+    ${factHtml}
+  </div>`;
 }
 
 // ── COUNTRY DATA ─────────────────────────────────────────────
