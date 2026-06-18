@@ -761,7 +761,7 @@ function renderPreds(){
     const doneCnt=ms.filter(m=>m.status==='FINISHED').length;
     const allDone=doneCnt===ms.length;
     let rows=f==='predict'?ms.filter(m=>m.status!=='FINISHED'):ms;
-    if(onlyUs) rows=rows.filter(m=>MEMBERS.some(w=>preds[m.id]?.[w]));
+    if(onlyUs) rows=rows.filter(m=>m.status!=='FINISHED'||MEMBERS.some(w=>preds[m.id]?.[w]));
     if(!rows.length) continue;
     hasContent=true;
     const gid='pg_'+g.replace(/\W+/g,'_');
