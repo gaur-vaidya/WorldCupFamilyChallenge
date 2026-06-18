@@ -767,7 +767,7 @@ function renderPreds(){
     if(!rows.length) continue;
     hasContent=true;
     const gid='pg_'+g.replace(/\W+/g,'_');
-    const hasToday=ms.some(m=>new Date(m.utcDate).toLocaleDateString('en-CA',{timeZone:'Asia/Kolkata'})===todayIST);
+    const hasToday=ms.some(m=>new Date(m.utcDate).toLocaleDateString('en-CA',{timeZone:'Asia/Kolkata'})===todayIST&&m.status!=='FINISHED');
     const toggled=window._toggledGroups.has(g);
     const collapsed=toggled?hasToday:!hasToday;
     const clickable=true;
