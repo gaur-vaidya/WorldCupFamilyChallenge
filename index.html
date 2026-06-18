@@ -743,7 +743,7 @@ function renderPreds(){
   const grouped={};
   list.forEach(m=>{const k=m.matchday?`Matchday ${m.matchday}`:stageLabel(m.stage,m.group);(grouped[k]=grouped[k]||[]).push(m);});
 
-  const onlyUs = window._predOnlyUs !== false;
+  const onlyUs = window._predOnlyUs === true;
   let html=`<div class="pred-filter-bar">
     <button class="pred-filter-btn${f==='predict'?' active':''}" onclick="setPredFilter('predict')">⚽ To Predict</button>
     <button class="pred-filter-btn${f==='all'?' active':''}" onclick="setPredFilter('all')">All Matches</button>
@@ -766,8 +766,8 @@ function renderPreds(){
     if(!rows.length) continue;
     hasContent=true;
     const gid='pg_'+g.replace(/\W+/g,'_');
-    const collapsed=f==='all'&&allDone&&!window._expandedGroups.has(g);
-    const clickable=allDone&&f==='all';
+    const collapsed=allDone&&!window._expandedGroups.has(g);
+    const clickable=allDone;
     html+=`<div class="card" style="overflow-x:auto;padding:0;margin-bottom:12px">
       <div class="pred-group-hdr${clickable?' clickable':''}"${clickable?` onclick="togglePredGroup('${gid}','${g}')"`:''}">
         <span>${g}</span>
