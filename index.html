@@ -81,9 +81,17 @@ body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; backg
 .ftab.on { background:var(--gold); border-color:var(--gold); color:#0a0e1a; }
 
 /* Predictions */
-.pred-filter-bar { display:flex; gap:8px; margin-bottom:16px; position:sticky; top:92px; z-index:20; background:var(--bg); padding:6px 0; }
+.pred-filter-bar { display:flex; gap:8px; margin-bottom:16px; position:sticky; top:92px; z-index:20; background:var(--bg); padding:6px 0; flex-wrap:wrap; align-items:center; }
 .pred-filter-btn { padding:6px 18px; border-radius:20px; border:1px solid var(--border); background:var(--bg-card); color:var(--text2); font-size:.8rem; font-weight:600; cursor:pointer; transition:all .15s; }
 .pred-filter-btn.active { background:var(--gold); border-color:var(--gold); color:#0a0e1a; }
+.pred-toggle { display:flex; align-items:center; gap:7px; margin-left:auto; cursor:pointer; user-select:none; }
+.pred-toggle-lbl { font-size:.75rem; color:var(--text2); font-weight:600; white-space:nowrap; }
+.t-sw { position:relative; width:34px; height:20px; flex-shrink:0; }
+.t-sw input { opacity:0; width:0; height:0; position:absolute; }
+.t-track { position:absolute; inset:0; background:var(--text3); border-radius:20px; transition:background .2s; }
+.t-track::after { content:''; position:absolute; width:16px; height:16px; left:2px; top:2px; background:#fff; border-radius:50%; transition:transform .2s; }
+.t-sw input:checked ~ .t-track { background:var(--blue); }
+.t-sw input:checked ~ .t-track::after { transform:translateX(14px); }
 .pred-group-hdr { display:flex; align-items:center; justify-content:space-between; padding:12px 20px; font-size:.7rem; font-weight:700; text-transform:uppercase; letter-spacing:.08em; color:var(--text2); border-bottom:1px solid var(--border); }
 .pred-group-hdr.clickable { cursor:pointer; }
 .pred-group-hdr.clickable:hover { background:var(--bg-card2); color:var(--text); }
@@ -700,17 +708,26 @@ function renderPreds(){
   const grouped={};
   list.forEach(m=>{const k=m.matchday?`Matchday ${m.matchday}`:stageLabel(m.stage,m.group);(grouped[k]=grouped[k]||[]).push(m);});
 
+  const onlyUs = window._predOnlyUs !== false;
   let html=`<div class="pred-filter-bar">
     <button class="pred-filter-btn${f==='predict'?' active':''}" onclick="setPredFilter('predict')">⚽ To Predict</button>
     <button class="pred-filter-btn${f==='all'?' active':''}" onclick="setPredFilter('all')">All Matches</button>
+    <label class="pred-toggle" title="Only show matches where at least one of us has predicted">
+      <span class="pred-toggle-lbl">👥 Our picks only</span>
+      <div class="t-sw">
+        <input type="checkbox" ${onlyUs?'checked':''} onchange="setPredOnlyUs(this.checked)">
+        <div class="t-track"></div>
+      </div>
+    </label>
   </div>`;
 
   let hasContent=false;
   for(const [g,ms] of Object.entries(grouped)){
     const doneCnt=ms.filter(m=>m.status==='FINISHED').length;
     const allDone=doneCnt===ms.length;
-    const rows=f==='predict'?ms.filter(m=>m.status!=='FINISHED'):ms;
-    if(f==='predict'&&!rows.length) continue;
+    let rows=f==='predict'?ms.filter(m=>m.status!=='FINISHED'):ms;
+    if(onlyUs) rows=rows.filter(m=>MEMBERS.some(w=>preds[m.id]?.[w]));
+    if(!rows.length) continue;
     hasContent=true;
     const gid='pg_'+g.replace(/\W+/g,'_');
     const collapsed=f==='all'&&allDone&&!window._expandedGroups.has(g);
@@ -739,6 +756,7 @@ function renderPreds(){
   el.innerHTML=html;
 }
 function setPredFilter(f){window._predFilter=f;renderPreds();}
+function setPredOnlyUs(v){window._predOnlyUs=v;renderPreds();}
 function togglePredGroup(gid,gname){
   const body=document.getElementById(gid),icon=document.getElementById(gid+'_icon');
   if(!body)return;
