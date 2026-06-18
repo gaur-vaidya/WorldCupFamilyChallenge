@@ -760,8 +760,9 @@ function renderPreds(){
   for(const [g,ms] of Object.entries(grouped)){
     const doneCnt=ms.filter(m=>m.status==='FINISHED').length;
     const allDone=doneCnt===ms.length;
-    let rows=f==='predict'?ms.filter(m=>m.status!=='FINISHED'):ms;
-    if(onlyUs) rows=rows.filter(m=>m.status!=='FINISHED'||MEMBERS.some(w=>preds[m.id]?.[w]));
+    let rows;
+    if(onlyUs) rows=ms.filter(m=>m.status!=='FINISHED'||MEMBERS.some(w=>preds[m.id]?.[w]));
+    else rows=f==='predict'?ms.filter(m=>m.status!=='FINISHED'):ms;
     if(!rows.length) continue;
     hasContent=true;
     const gid='pg_'+g.replace(/\W+/g,'_');
