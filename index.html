@@ -156,6 +156,45 @@ body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; backg
 @media (max-width:600px) {
   .content { padding:12px; }
   .score-grid { gap:8px; } .sc-pts { font-size:1.4rem; } .team-flag { font-size:1.4rem; }
+
+  /* Predictions: table → card layout on mobile */
+  .pred-table { display:block; }
+  .pred-table thead { display:none; }
+  .pred-table tbody { display:block; }
+  .pred-table tr {
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    margin-bottom:8px;
+    border:1px solid var(--border);
+    border-radius:10px;
+    overflow:hidden;
+    background:var(--bg-card2);
+  }
+  .pred-table td:first-child {
+    grid-column:1 / -1;
+    min-width:unset !important;
+    padding:12px 14px;
+    border-bottom:1px solid var(--border);
+  }
+  .pred-table td:not(:first-child) {
+    text-align:center;
+    padding:10px 6px;
+    border-right:1px solid var(--border);
+    border-bottom:none;
+    padding-left:6px;
+    padding-right:6px;
+  }
+  .pred-table td:last-child { border-right:none; }
+  .pred-table td:not(:first-child)::before {
+    content:attr(data-who);
+    display:block;
+    font-size:.65rem;
+    color:var(--text2);
+    font-weight:700;
+    margin-bottom:6px;
+    letter-spacing:.04em;
+  }
+  .pred-inputs { justify-content:center; }
 }
 
 /* Passport */
@@ -724,10 +763,11 @@ function predRow(m,preds){
     </td>
     ${MEMBERS.map(w=>{
       const p=mp[w],pts=done&&scoreKnown(m)?calcPts(p,m):null;
-      if(done) return `<td>${p?`<span class="pred-done">${p.homeScore}–${p.awayScore}</span>${pts!==null?`<span class="pts-badge">+${pts}</span>`:''}`:'<span class="pred-locked">—</span>'}</td>`;
-      if(locked) return `<td>${p?`<span class="pred-done" style="color:var(--text2)">${p.homeScore}–${p.awayScore} 🔒</span>`:'<span class="pred-locked">🔒</span>'}</td>`;
+      const dw=`data-who="${ICONS[w]} ${w}"`;
+      if(done) return `<td ${dw}>${p?`<span class="pred-done">${p.homeScore}–${p.awayScore}</span>${pts!==null?`<span class="pts-badge" style="display:block;margin:4px auto 0;width:fit-content">+${pts}</span>`:''}`:'<span class="pred-locked">—</span>'}</td>`;
+      if(locked) return `<td ${dw}>${p?`<span class="pred-done" style="color:var(--text2)">${p.homeScore}–${p.awayScore} 🔒</span>`:'<span class="pred-locked">🔒</span>'}</td>`;
       const ph=p?.homeScore??'',pa=p?.awayScore??'';
-      return `<td><div class="pred-inputs"><input type="number" min="0" max="20" class="score-inp" value="${ph}" placeholder="?" oninput="savePred(${m.id},'${w}','home',this.value)"><span class="pred-sep">–</span><input type="number" min="0" max="20" class="score-inp" value="${pa}" placeholder="?" oninput="savePred(${m.id},'${w}','away',this.value)"></div></td>`;
+      return `<td ${dw}><div class="pred-inputs"><input type="number" min="0" max="20" class="score-inp" value="${ph}" placeholder="?" oninput="savePred(${m.id},'${w}','home',this.value)"><span class="pred-sep">–</span><input type="number" min="0" max="20" class="score-inp" value="${pa}" placeholder="?" oninput="savePred(${m.id},'${w}','away',this.value)"></div></td>`;
     }).join('')}
   </tr>`;
 }
