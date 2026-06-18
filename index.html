@@ -748,7 +748,7 @@ function renderPreds(){
     <button class="pred-filter-btn${f==='predict'?' active':''}" onclick="setPredFilter('predict')">⚽ To Predict</button>
     <button class="pred-filter-btn${f==='all'?' active':''}" onclick="setPredFilter('all')">All Matches</button>
     <label class="pred-toggle" title="Only show matches where at least one of us has predicted">
-      <span class="pred-toggle-lbl">👥 Our picks</span>
+      <span class="pred-toggle-lbl">Picked</span>
       <div class="t-sw">
         <input type="checkbox" ${onlyUs?'checked':''} onchange="setPredOnlyUs(this.checked)">
         <div class="t-track"></div>
