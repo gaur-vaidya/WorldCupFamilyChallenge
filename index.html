@@ -563,12 +563,21 @@ function stageLabel(stage, group) {
   const map={'GROUP_STAGE':group?'Group '+group.replace('GROUP_',''):'Group Stage','ROUND_OF_16':'Round of 16','QUARTER_FINALS':'Quarter-Final','SEMI_FINALS':'Semi-Final','FINAL':'Final','THIRD_PLACE':'3rd Place'};
   return map[stage]||stage||'Match';
 }
+function scoreKnown(m) {
+  const ft=m.score?.fullTime;
+  return ft && ft.home !== null && ft.away !== null;
+}
 function matchCard(m) {
   const r=rate(m), hn=m.homeTeam?.name||'TBD', an=m.awayTeam?.name||'TBD';
   const ht=m.homeTeam?.tla||m.homeTeam?.shortName||'?', at=m.awayTeam?.tla||m.awayTeam?.shortName||'?';
   const ft=m.score?.fullTime, live=m.status==='IN_PLAY'||m.status==='PAUSED', done=m.status==='FINISHED';
-  let sc; if(done) sc=`<div class="mc-score">${ft?.home??'?'} - ${ft?.away??'?'}</div>`; else if(live) sc=`<div class="mc-score live">${ft?.home??0} - ${ft?.away??0}</div>`; else sc=`<div class="mc-time">${fmtTime(m.utcDate)} IST</div>`;
-  const bc=live?'s-live':done?'s-ft':'s-sched', bt=live?(m.status==='PAUSED'?'⏸ HT':'🔴 Live'):done?'FT':fmtTime(m.utcDate)+' IST';
+  const hasScore = scoreKnown(m);
+  let sc;
+  if(done && hasScore) sc=`<div class="mc-score">${ft.home} - ${ft.away}</div>`;
+  else if(done) sc=`<div class="mc-score" style="font-size:.9rem;color:var(--text3)">⏳</div>`;
+  else if(live) sc=`<div class="mc-score live">${ft?.home??0} - ${ft?.away??0}</div>`;
+  else sc=`<div class="mc-time">${fmtTime(m.utcDate)} IST</div>`;
+  const bc=live?'s-live':done?'s-ft':'s-sched', bt=live?(m.status==='PAUSED'?'⏸ HT':'🔴 Live'):done?(hasScore?'FT':'Score pending'):fmtTime(m.utcDate)+' IST';
   const watched = done && getScrapbook()[m.id]?.watched;
   const logBtn = done ? `<button class="log-mem-btn" onclick="goScrapbook(${m.id})">📖 Log Memory${watched?' · ✓ Watched':''}</button>` : '';
   return `<div class="mc"><div class="mc-hdr"><span class="mc-stage">${stageLabel(m.stage,m.group)}</span><span class="mc-rating" title="${r.text}">${r.label}</span></div><div class="mc-teams"><div class="team"><span class="team-flag">${flag(hn)}</span><div class="team-name">${hn}</div><div class="team-tla">${ht}</div></div><div class="mc-mid">${sc}<span class="sbadge ${bc}">${bt}</span></div><div class="team"><span class="team-flag">${flag(an)}</span><div class="team-name">${an}</div><div class="team-tla">${at}</div></div></div>${logBtn}</div>`;
@@ -711,11 +720,11 @@ function predRow(m,preds){
       <div style="font-weight:700;font-size:.9rem;line-height:1.5">${hf}${htla?` <span style="color:var(--text3);font-size:.72rem">(${htla})</span>`:''} <span style="color:var(--text3);font-weight:400">vs</span> ${af}${atla?` <span style="color:var(--text3);font-size:.72rem">(${atla})</span>`:''}</div>
       <div style="font-size:.75rem;color:var(--text2);font-weight:600;margin-top:1px">${hn} vs ${an}</div>
       <div style="font-size:.65rem;color:var(--text3);margin-top:2px">${fmtDate(m.utcDate)} IST · ${stageLabel(m.stage,m.group)}</div>
-      ${done&&ft?`<div style="font-size:.78rem;color:var(--gold);font-weight:700;margin-top:2px">FT: ${ft.home}–${ft.away}</div>`:''}
+      ${done&&scoreKnown(m)?`<div style="font-size:.78rem;color:var(--gold);font-weight:700;margin-top:2px">FT: ${ft.home}–${ft.away}</div>`:done?`<div style="font-size:.72rem;color:var(--text3);margin-top:2px">⏳ Score updating… hit Sync</div>`:''}
     </td>
     ${MEMBERS.map(w=>{
-      const p=mp[w],pts=done?calcPts(p,m):null;
-      if(done) return `<td>${p?`<span class="pred-done">${p.homeScore}–${p.awayScore}</span><span class="pts-badge">+${pts??0}</span>`:'<span class="pred-locked">—</span>'}</td>`;
+      const p=mp[w],pts=done&&scoreKnown(m)?calcPts(p,m):null;
+      if(done) return `<td>${p?`<span class="pred-done">${p.homeScore}–${p.awayScore}</span>${pts!==null?`<span class="pts-badge">+${pts}</span>`:''}`:'<span class="pred-locked">—</span>'}</td>`;
       if(locked) return `<td>${p?`<span class="pred-done" style="color:var(--text2)">${p.homeScore}–${p.awayScore} 🔒</span>`:'<span class="pred-locked">🔒</span>'}</td>`;
       const ph=p?.homeScore??'',pa=p?.awayScore??'';
       return `<td><div class="pred-inputs"><input type="number" min="0" max="20" class="score-inp" value="${ph}" placeholder="?" oninput="savePred(${m.id},'${w}','home',this.value)"><span class="pred-sep">–</span><input type="number" min="0" max="20" class="score-inp" value="${pa}" placeholder="?" oninput="savePred(${m.id},'${w}','away',this.value)"></div></td>`;
@@ -802,11 +811,20 @@ function hideModal(id){document.getElementById(id).classList.add('hide');}
 let _tt;
 function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');clearTimeout(_tt);_tt=setTimeout(()=>t.classList.remove('show'),3000);}
 
-// ── AUTO-REFRESH during live matches ─────────────────────────
+// ── AUTO-REFRESH: live matches OR recently finished (score may still be updating) ──
 setInterval(async()=>{
-  if(matches.some(m=>m.status==='IN_PLAY'||m.status==='PAUSED')){
-    try{await fetchMatches(true);render(curPage);}catch{}
-  }
+  const now = Date.now();
+  const needsRefresh = matches.some(m => {
+    if (m.status==='IN_PLAY' || m.status==='PAUSED') return true;
+    // keep refreshing for 3 hours after a match ends in case API score is delayed
+    if (m.status==='FINISHED' && !scoreKnown(m)) return true;
+    if (m.status==='FINISHED') {
+      const ended = new Date(m.utcDate).getTime() + 2*60*60*1000; // ~2h after kickoff
+      return now - ended < 3*60*60*1000;
+    }
+    return false;
+  });
+  if(needsRefresh){ try{await fetchMatches(true);render(curPage);}catch{} }
 },60000);
 
 // ── INIT ─────────────────────────────────────────────────────
