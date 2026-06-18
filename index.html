@@ -157,6 +157,58 @@ body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; backg
   .content { padding:12px; }
   .score-grid { gap:8px; } .sc-pts { font-size:1.4rem; } .team-flag { font-size:1.4rem; }
 }
+
+/* Passport */
+.passport-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(148px,1fr)); gap:12px; }
+.stamp { background:var(--bg-card2); border:2px solid var(--border); border-radius:12px; padding:14px; text-align:center; }
+.stamp.unlocked { border-color:var(--gold); background:#141000; }
+.stamp.locked { opacity:.38; }
+.stamp-flag { font-size:2.4rem; display:block; margin-bottom:6px; }
+.stamp-name { font-size:.78rem; font-weight:700; margin-bottom:2px; line-height:1.3; }
+.stamp-capital { font-size:.64rem; color:var(--text2); }
+.stamp-continent { font-size:.6rem; color:var(--text3); text-transform:uppercase; letter-spacing:.06em; margin-top:2px; }
+.stamp-seen { font-size:.65rem; color:var(--gold); margin-top:5px; font-weight:600; }
+.star-row { display:flex; justify-content:center; gap:1px; margin-top:5px; }
+.pstar { cursor:pointer; font-size:.9rem; user-select:none; }
+
+/* Achievements */
+.ach-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(168px,1fr)); gap:12px; }
+.ach-card { background:var(--bg-card2); border:2px solid var(--border); border-radius:12px; padding:16px; text-align:center; transition:border-color .2s; }
+.ach-card.unlocked { border-color:var(--gold); background:#141000; }
+.ach-card.locked { opacity:.42; filter:grayscale(.7); }
+.ach-icon { font-size:2.2rem; margin-bottom:8px; display:block; }
+.ach-title { font-size:.85rem; font-weight:700; margin-bottom:4px; }
+.ach-desc { font-size:.7rem; color:var(--text2); line-height:1.4; }
+.ach-who { margin-top:9px; display:flex; gap:4px; justify-content:center; flex-wrap:wrap; }
+.ach-badge { font-size:.62rem; padding:2px 7px; border-radius:10px; background:var(--bg); color:var(--text2); }
+.ach-badge.dad { background:#4a9eff18; color:var(--dad); }
+.ach-badge.mom { background:#ff79c618; color:var(--mom); }
+.ach-badge.son { background:#27c93f18; color:var(--son); }
+.ach-badge.fam { background:#f5c51818; color:var(--gold); }
+
+/* Scrapbook */
+.scrap-card { background:var(--bg-card2); border:1px solid var(--border); border-radius:10px; overflow:hidden; margin-bottom:10px; }
+.scrap-hdr { padding:14px 16px; display:flex; align-items:center; justify-content:space-between; cursor:pointer; user-select:none; }
+.scrap-hdr:hover { background:#ffffff07; }
+.scrap-match-info { font-size:.88rem; font-weight:700; line-height:1.4; }
+.scrap-sub { font-size:.68rem; color:var(--text2); margin-top:2px; }
+.scrap-watched-btn { padding:3px 10px; border-radius:14px; border:1px solid var(--border); background:transparent; color:var(--text2); font-size:.7rem; font-weight:600; cursor:pointer; white-space:nowrap; transition:all .15s; }
+.scrap-watched-btn.on { background:#27c93f18; border-color:var(--green); color:var(--green); }
+.scrap-body { padding:16px; border-top:1px solid var(--border); display:none; }
+.scrap-body.open { display:block; }
+.scrap-sec-lbl { font-size:.68rem; font-weight:700; text-transform:uppercase; letter-spacing:.07em; color:var(--text2); margin-bottom:8px; margin-top:14px; }
+.scrap-sec-lbl:first-child { margin-top:0; }
+.scrap-comments { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; }
+.scrap-person-lbl { font-size:.68rem; font-weight:700; margin-bottom:5px; }
+.scrap-person-lbl.dad { color:var(--dad); } .scrap-person-lbl.mom { color:var(--mom); } .scrap-person-lbl.son { color:var(--son); }
+.scrap-ta { width:100%; background:var(--bg); border:1px solid var(--border); color:var(--text); padding:8px 10px; border-radius:8px; font-size:.8rem; resize:vertical; min-height:68px; font-family:inherit; }
+.scrap-ta:focus { outline:none; border-color:var(--gold); }
+.scrap-rating { display:flex; gap:6px; align-items:center; }
+.scrap-rstar { font-size:1.3rem; cursor:pointer; user-select:none; opacity:.35; transition:opacity .1s; }
+.scrap-rstar.on { opacity:1; }
+.log-mem-btn { width:100%; margin-top:10px; padding:7px; border-radius:8px; border:1px solid var(--border); background:var(--bg); color:var(--text2); font-size:.75rem; cursor:pointer; transition:all .15s; text-align:center; }
+.log-mem-btn:hover { border-color:var(--gold); color:var(--gold); }
+@media (max-width:520px) { .scrap-comments { grid-template-columns:1fr; } }
 </style>
 </head>
 <body>
@@ -204,6 +256,9 @@ body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; backg
   <div class="tab" data-pg="predictions" onclick="go(this)">📝 Predictions</div>
   <div class="tab" data-pg="leaderboard" onclick="go(this)">🏆 Leaderboard</div>
   <div class="tab" data-pg="backup" onclick="go(this)">💾 Backup</div>
+  <div class="tab" data-pg="passport" onclick="go(this)">🌍 Passport</div>
+  <div class="tab" data-pg="achievements" onclick="go(this)">🏅 Achievements</div>
+  <div class="tab" data-pg="scrapbook" onclick="go(this)">📖 Scrapbook</div>
 </nav>
 
 <main class="content">
@@ -256,6 +311,21 @@ body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; backg
       <p style="color:var(--text2);font-size:.88rem;margin-bottom:14px">Clear all stored predictions. Cannot be undone.</p>
       <button class="btn btn-danger" onclick="doClear()">🗑 Clear Predictions</button>
     </div>
+  </div>
+
+  <div class="page" id="pg-passport">
+    <div class="pg-title">🌍 Passport</div>
+    <div id="passportOut"></div>
+  </div>
+
+  <div class="page" id="pg-achievements">
+    <div class="pg-title">🏅 Achievements</div>
+    <div id="achOut"></div>
+  </div>
+
+  <div class="page" id="pg-scrapbook">
+    <div class="pg-title">📖 Scrapbook</div>
+    <div id="scrapbookOut"></div>
   </div>
 
 </main>
@@ -499,7 +569,9 @@ function matchCard(m) {
   const ft=m.score?.fullTime, live=m.status==='IN_PLAY'||m.status==='PAUSED', done=m.status==='FINISHED';
   let sc; if(done) sc=`<div class="mc-score">${ft?.home??'?'} - ${ft?.away??'?'}</div>`; else if(live) sc=`<div class="mc-score live">${ft?.home??0} - ${ft?.away??0}</div>`; else sc=`<div class="mc-time">${fmtTime(m.utcDate)} IST</div>`;
   const bc=live?'s-live':done?'s-ft':'s-sched', bt=live?(m.status==='PAUSED'?'⏸ HT':'🔴 Live'):done?'FT':fmtTime(m.utcDate)+' IST';
-  return `<div class="mc"><div class="mc-hdr"><span class="mc-stage">${stageLabel(m.stage,m.group)}</span><span class="mc-rating" title="${r.text}">${r.label}</span></div><div class="mc-teams"><div class="team"><span class="team-flag">${flag(hn)}</span><div class="team-name">${hn}</div><div class="team-tla">${ht}</div></div><div class="mc-mid">${sc}<span class="sbadge ${bc}">${bt}</span></div><div class="team"><span class="team-flag">${flag(an)}</span><div class="team-name">${an}</div><div class="team-tla">${at}</div></div></div></div>`;
+  const watched = done && getScrapbook()[m.id]?.watched;
+  const logBtn = done ? `<button class="log-mem-btn" onclick="goScrapbook(${m.id})">📖 Log Memory${watched?' · ✓ Watched':''}</button>` : '';
+  return `<div class="mc"><div class="mc-hdr"><span class="mc-stage">${stageLabel(m.stage,m.group)}</span><span class="mc-rating" title="${r.text}">${r.label}</span></div><div class="mc-teams"><div class="team"><span class="team-flag">${flag(hn)}</span><div class="team-name">${hn}</div><div class="team-tla">${ht}</div></div><div class="mc-mid">${sc}<span class="sbadge ${bc}">${bt}</span></div><div class="team"><span class="team-flag">${flag(an)}</span><div class="team-name">${an}</div><div class="team-tla">${at}</div></div></div>${logBtn}</div>`;
 }
 
 // ── NAVIGATION ───────────────────────────────────────────────
@@ -516,6 +588,9 @@ function render(pg) {
   else if (pg==='matches') renderMatches();
   else if (pg==='predictions') renderPreds();
   else if (pg==='leaderboard') renderLB();
+  else if (pg==='passport') renderPassport();
+  else if (pg==='achievements') renderAch();
+  else if (pg==='scrapbook') renderScrapbook();
 }
 
 // ── DASHBOARD ────────────────────────────────────────────────
@@ -749,6 +824,405 @@ async function init(){
   hideModal('modalKey');
   if(window.__MATCHES__?.length) { matches=window.__MATCHES__; render('dashboard'); }
   await syncData();
+}
+
+// ── COUNTRY DATA ─────────────────────────────────────────────
+const COUNTRY_DATA = {
+  'Argentina':{'capital':'Buenos Aires','continent':'South America'},
+  'Brazil':{'capital':'Brasília','continent':'South America'},
+  'France':{'capital':'Paris','continent':'Europe'},
+  'Germany':{'capital':'Berlin','continent':'Europe'},
+  'Spain':{'capital':'Madrid','continent':'Europe'},
+  'Portugal':{'capital':'Lisbon','continent':'Europe'},
+  'England':{'capital':'London','continent':'Europe'},
+  'Italy':{'capital':'Rome','continent':'Europe'},
+  'Netherlands':{'capital':'Amsterdam','continent':'Europe'},
+  'Belgium':{'capital':'Brussels','continent':'Europe'},
+  'Croatia':{'capital':'Zagreb','continent':'Europe'},
+  'Uruguay':{'capital':'Montevideo','continent':'South America'},
+  'Colombia':{'capital':'Bogotá','continent':'South America'},
+  'Mexico':{'capital':'Mexico City','continent':'North America'},
+  'United States':{'capital':'Washington D.C.','continent':'North America'},
+  'USA':{'capital':'Washington D.C.','continent':'North America'},
+  'Japan':{'capital':'Tokyo','continent':'Asia'},
+  'South Korea':{'capital':'Seoul','continent':'Asia'},
+  'Korea Republic':{'capital':'Seoul','continent':'Asia'},
+  'Senegal':{'capital':'Dakar','continent':'Africa'},
+  'Morocco':{'capital':'Rabat','continent':'Africa'},
+  'Australia':{'capital':'Canberra','continent':'Oceania'},
+  'Canada':{'capital':'Ottawa','continent':'North America'},
+  'Ecuador':{'capital':'Quito','continent':'South America'},
+  'Switzerland':{'capital':'Bern','continent':'Europe'},
+  'Poland':{'capital':'Warsaw','continent':'Europe'},
+  'Serbia':{'capital':'Belgrade','continent':'Europe'},
+  'Denmark':{'capital':'Copenhagen','continent':'Europe'},
+  'Wales':{'capital':'Cardiff','continent':'Europe'},
+  'Ghana':{'capital':'Accra','continent':'Africa'},
+  'Cameroon':{'capital':'Yaoundé','continent':'Africa'},
+  'Saudi Arabia':{'capital':'Riyadh','continent':'Asia'},
+  'Iran':{'capital':'Tehran','continent':'Asia'},
+  'Qatar':{'capital':'Doha','continent':'Asia'},
+  'Tunisia':{'capital':'Tunis','continent':'Africa'},
+  'Costa Rica':{'capital':'San José','continent':'North America'},
+  'Chile':{'capital':'Santiago','continent':'South America'},
+  'Peru':{'capital':'Lima','continent':'South America'},
+  'Panama':{'capital':'Panama City','continent':'North America'},
+  'Honduras':{'capital':'Tegucigalpa','continent':'North America'},
+  'Venezuela':{'capital':'Caracas','continent':'South America'},
+  'Turkey':{'capital':'Ankara','continent':'Europe'},
+  'Austria':{'capital':'Vienna','continent':'Europe'},
+  'Sweden':{'capital':'Stockholm','continent':'Europe'},
+  'Norway':{'capital':'Oslo','continent':'Europe'},
+  'Ukraine':{'capital':'Kyiv','continent':'Europe'},
+  'Nigeria':{'capital':'Abuja','continent':'Africa'},
+  'Egypt':{'capital':'Cairo','continent':'Africa'},
+  'Algeria':{'capital':'Algiers','continent':'Africa'},
+  'South Africa':{'capital':'Pretoria','continent':'Africa'},
+  'New Zealand':{'capital':'Wellington','continent':'Oceania'},
+  'Jamaica':{'capital':'Kingston','continent':'North America'},
+  'Paraguay':{'capital':'Asunción','continent':'South America'},
+  'Bolivia':{'capital':'Sucre','continent':'South America'},
+  'Hungary':{'capital':'Budapest','continent':'Europe'},
+  'Czech Republic':{'capital':'Prague','continent':'Europe'},
+  'Czechia':{'capital':'Prague','continent':'Europe'},
+  'Slovakia':{'capital':'Bratislava','continent':'Europe'},
+  'Scotland':{'capital':'Edinburgh','continent':'Europe'},
+  'Romania':{'capital':'Bucharest','continent':'Europe'},
+  'Greece':{'capital':'Athens','continent':'Europe'},
+  'Slovenia':{'capital':'Ljubljana','continent':'Europe'},
+  'Albania':{'capital':'Tirana','continent':'Europe'},
+  'North Macedonia':{'capital':'Skopje','continent':'Europe'},
+  'Iraq':{'capital':'Baghdad','continent':'Asia'},
+  'UAE':{'capital':'Abu Dhabi','continent':'Asia'},
+  'Jordan':{'capital':'Amman','continent':'Asia'},
+  'Uzbekistan':{'capital':'Tashkent','continent':'Asia'},
+  'Indonesia':{'capital':'Jakarta','continent':'Asia'},
+  "Côte d'Ivoire":{'capital':'Yamoussoukro','continent':'Africa'},
+  'Ivory Coast':{'capital':'Yamoussoukro','continent':'Africa'},
+  'Mali':{'capital':'Bamako','continent':'Africa'},
+  'El Salvador':{'capital':'San Salvador','continent':'North America'},
+  'Guatemala':{'capital':'Guatemala City','continent':'North America'},
+  'Trinidad and Tobago':{'capital':'Port of Spain','continent':'North America'},
+  'Cuba':{'capital':'Havana','continent':'North America'},
+  'Haiti':{'capital':'Port-au-Prince','continent':'North America'},
+  'China PR':{'capital':'Beijing','continent':'Asia'},
+  'China':{'capital':'Beijing','continent':'Asia'},
+  'Thailand':{'capital':'Bangkok','continent':'Asia'},
+  'Vietnam':{'capital':'Hanoi','continent':'Asia'},
+  'India':{'capital':'New Delhi','continent':'Asia'},
+  'Kenya':{'capital':'Nairobi','continent':'Africa'},
+  'Tanzania':{'capital':'Dodoma','continent':'Africa'},
+  'Zambia':{'capital':'Lusaka','continent':'Africa'},
+  'Zimbabwe':{'capital':'Harare','continent':'Africa'},
+  'Angola':{'capital':'Luanda','continent':'Africa'},
+  'Congo':{'capital':'Brazzaville','continent':'Africa'},
+  'DR Congo':{'capital':'Kinshasa','continent':'Africa'},
+  'Burkina Faso':{'capital':'Ouagadougou','continent':'Africa'},
+  'Mozambique':{'capital':'Maputo','continent':'Africa'},
+  'Nicaragua':{'capital':'Managua','continent':'North America'},
+  'Curaçao':{'capital':'Willemstad','continent':'North America'},
+  'Dominican Republic':{'capital':'Santo Domingo','continent':'North America'},
+  'Bahrain':{'capital':'Manama','continent':'Asia'},
+  'Kuwait':{'capital':'Kuwait City','continent':'Asia'},
+  'Oman':{'capital':'Muscat','continent':'Asia'},
+  'Syria':{'capital':'Damascus','continent':'Asia'},
+  'Lebanon':{'capital':'Beirut','continent':'Asia'},
+  'Georgia':{'capital':'Tbilisi','continent':'Europe'},
+  'Kazakhstan':{'capital':'Astana','continent':'Asia'},
+  'Kyrgyzstan':{'capital':'Bishkek','continent':'Asia'},
+  'Tajikistan':{'capital':'Dushanbe','continent':'Asia'},
+};
+
+// ── SCRAPBOOK ────────────────────────────────────────────────
+function getScrapbook() { return get('scrapbook', {}); }
+function saveScrapbook(sb) { set('scrapbook', sb); }
+
+function toggleWatched(matchId) {
+  const sb = getScrapbook();
+  if (!sb[matchId]) sb[matchId] = {};
+  sb[matchId].watched = !sb[matchId].watched;
+  saveScrapbook(sb);
+  // Update just the button without full re-render (preserve open bodies)
+  const btn = document.getElementById('sw-btn-'+matchId);
+  if (btn) {
+    const on = sb[matchId].watched;
+    btn.textContent = on ? '👁 Watched' : '👁 Mark Watched';
+    btn.classList.toggle('on', on);
+  }
+  // Update log-mem button on match cards if visible
+  render(curPage === 'scrapbook' ? curPage : curPage);
+}
+
+function saveScrapEntry(matchId, field, value) {
+  const sb = getScrapbook();
+  if (!sb[matchId]) sb[matchId] = {};
+  sb[matchId][field] = value;
+  saveScrapbook(sb);
+}
+
+function setScrapRating(el, matchId, rating) {
+  const sb = getScrapbook();
+  if (!sb[matchId]) sb[matchId] = {};
+  sb[matchId].rating = rating;
+  saveScrapbook(sb);
+  const container = el.closest('.scrap-rating');
+  if (container) container.querySelectorAll('.scrap-rstar').forEach((s,i) => {
+    s.classList.toggle('on', i < rating);
+    s.textContent = i < rating ? '⭐' : '☆';
+  });
+  const lbl = document.getElementById('sr-lbl-'+matchId);
+  if (lbl) lbl.textContent = rating+'/5';
+}
+
+function toggleScrapBody(matchId) {
+  const body = document.getElementById('scrap-body-'+matchId);
+  if (!body) return;
+  const open = body.classList.toggle('open');
+  const icon = document.getElementById('scrap-tog-'+matchId);
+  if (icon) icon.textContent = open ? '▼' : '▶';
+}
+
+function goScrapbook(matchId) {
+  const tab = document.querySelector('[data-pg="scrapbook"]');
+  if (tab) go(tab);
+  // render is synchronous so DOM is ready
+  const body = document.getElementById('scrap-body-'+matchId);
+  if (body && !body.classList.contains('open')) {
+    body.classList.add('open');
+    const icon = document.getElementById('scrap-tog-'+matchId);
+    if (icon) icon.textContent = '▼';
+  }
+  setTimeout(() => {
+    const card = body?.closest('.scrap-card');
+    if (card) card.scrollIntoView({behavior:'smooth', block:'center'});
+  }, 50);
+}
+
+function renderScrapbook() {
+  const el = document.getElementById('scrapbookOut');
+  if (!matches.length) {
+    el.innerHTML = '<div class="empty"><div class="ei">📖</div><div>No data — hit Sync first.</div></div>';
+    return;
+  }
+  const sb = getScrapbook();
+  const finished = matches.filter(m => m.status==='FINISHED')
+    .sort((a,b) => new Date(b.utcDate) - new Date(a.utcDate));
+  if (!finished.length) {
+    el.innerHTML = '<div class="empty"><div class="ei">📖</div><div>No finished matches yet — come back after the first match!</div></div>';
+    return;
+  }
+  const watchedCount = finished.filter(m => sb[m.id]?.watched).length;
+  const countrySet = new Set(finished.filter(m=>sb[m.id]?.watched).flatMap(m=>[m.homeTeam?.name,m.awayTeam?.name].filter(Boolean)));
+  el.innerHTML = `
+    <div class="card" style="margin-bottom:16px">
+      <div style="display:flex;gap:24px;align-items:center;flex-wrap:wrap">
+        <div style="text-align:center"><div style="font-size:1.8rem;font-weight:800;color:var(--gold)">${watchedCount}</div><div style="font-size:.7rem;color:var(--text2)">Matches Logged</div></div>
+        <div style="text-align:center"><div style="font-size:1.8rem;font-weight:800;color:var(--blue)">${countrySet.size}</div><div style="font-size:.7rem;color:var(--text2)">Countries Seen</div></div>
+        <div style="font-size:.78rem;color:var(--text2);flex:1">Tap a match to write your family memories 📝</div>
+      </div>
+    </div>
+    ${finished.map(m => scrapMatchCard(m, sb[m.id]||{})).join('')}`;
+}
+
+function scrapMatchCard(m, entry) {
+  const hn=m.homeTeam?.shortName||m.homeTeam?.name||'?', an=m.awayTeam?.shortName||m.awayTeam?.name||'?';
+  const hf=flag(m.homeTeam?.name,m.homeTeam?.tla)||'🏳️', af=flag(m.awayTeam?.name,m.awayTeam?.tla)||'🏳️';
+  const ft=m.score?.fullTime, watched=!!entry.watched, rating=entry.rating||0, id=m.id;
+  return `<div class="scrap-card">
+    <div class="scrap-hdr" onclick="toggleScrapBody(${id})">
+      <div>
+        <div class="scrap-match-info">${hf} ${hn} <span style="color:var(--gold);font-weight:800">${ft?ft.home+'-'+ft.away:'?'}</span> ${an} ${af}</div>
+        <div class="scrap-sub">${fmtDate(m.utcDate)} IST · ${stageLabel(m.stage,m.group)}</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;flex-shrink:0">
+        <button id="sw-btn-${id}" class="scrap-watched-btn${watched?' on':''}" onclick="event.stopPropagation();toggleWatched(${id})">${watched?'👁 Watched':'👁 Mark Watched'}</button>
+        <span id="scrap-tog-${id}" style="color:var(--text3);font-size:.75rem">▶</span>
+      </div>
+    </div>
+    <div class="scrap-body" id="scrap-body-${id}">
+      <div class="scrap-sec-lbl">Family Comments</div>
+      <div class="scrap-comments">
+        ${MEMBERS.map(w=>`<div>
+          <div class="scrap-person-lbl ${w.toLowerCase()}">${ICONS[w]} ${w}</div>
+          <textarea class="scrap-ta" placeholder="Your thoughts…" onchange="saveScrapEntry(${id},'${w.toLowerCase()}_comment',this.value)">${entry[w.toLowerCase()+'_comment']||''}</textarea>
+        </div>`).join('')}
+      </div>
+      <div class="scrap-sec-lbl">⭐ Favourite Moment</div>
+      <textarea class="scrap-ta" style="width:100%" placeholder="What was the highlight of this match?" onchange="saveScrapEntry(${id},'fav_moment',this.value)">${entry.fav_moment||''}</textarea>
+      <div class="scrap-sec-lbl">Match Rating</div>
+      <div class="scrap-rating">
+        ${[1,2,3,4,5].map(i=>`<span class="scrap-rstar${i<=rating?' on':''}" onclick="setScrapRating(this,${id},${i})">${i<=rating?'⭐':'☆'}</span>`).join('')}
+        <span id="sr-lbl-${id}" style="font-size:.78rem;color:var(--text2);margin-left:6px">${rating?rating+'/5':''}</span>
+      </div>
+    </div>
+  </div>`;
+}
+
+// ── PASSPORT ────────────────────────────────────────────────
+let _passportCountries = [];
+
+function getWatchedCountries() {
+  const sb = getScrapbook();
+  const counts = {};
+  matches.forEach(m => {
+    if (!sb[m.id]?.watched) return;
+    [m.homeTeam?.name, m.awayTeam?.name].forEach(c => { if (c) counts[c] = (counts[c]||0)+1; });
+  });
+  return counts;
+}
+
+function setCountryRating(el, idx, rating) {
+  const country = _passportCountries[idx];
+  if (!country) return;
+  const ratings = get('passport_ratings', {});
+  ratings[country] = rating;
+  set('passport_ratings', ratings);
+  const container = el.closest('.star-row');
+  if (container) container.querySelectorAll('.pstar').forEach((s,i) => {
+    s.textContent = i < rating ? '⭐' : '☆';
+  });
+}
+
+function renderPassport() {
+  const el = document.getElementById('passportOut');
+  const watched = getWatchedCountries();
+  const ratings = get('passport_ratings', {});
+  const allCountries = [...new Set(matches.flatMap(m => [m.homeTeam?.name, m.awayTeam?.name].filter(Boolean)))];
+  const sorted = allCountries.sort((a,b) => {
+    const aw=!!watched[a], bw=!!watched[b];
+    if (aw!==bw) return aw?-1:1;
+    return a.localeCompare(b);
+  });
+  _passportCountries = sorted;
+  const stamped = sorted.filter(c => watched[c]);
+  const continents = [...new Set(stamped.map(c=>COUNTRY_DATA[c]?.continent).filter(Boolean))];
+  if (!sorted.length) {
+    el.innerHTML = '<div class="empty"><div class="ei">🌍</div><div>No matches synced yet. Hit Sync first!</div></div>';
+    return;
+  }
+  el.innerHTML = `
+    <div class="card" style="margin-bottom:16px">
+      <div style="display:flex;gap:20px;flex-wrap:wrap;align-items:center">
+        <div style="text-align:center"><div style="font-size:1.8rem;font-weight:800;color:var(--gold)">${stamped.length}</div><div style="font-size:.7rem;color:var(--text2)">Countries Visited</div></div>
+        <div style="text-align:center"><div style="font-size:1.8rem;font-weight:800;color:var(--blue)">${continents.length}</div><div style="font-size:.7rem;color:var(--text2)">Continents</div></div>
+        <div style="text-align:center"><div style="font-size:1.8rem;font-weight:800;color:var(--green)">${sorted.length}</div><div style="font-size:.7rem;color:var(--text2)">Total WC Teams</div></div>
+      </div>
+      ${continents.length?`<div style="margin-top:12px;display:flex;gap:6px;flex-wrap:wrap">${continents.map(c=>`<span style="padding:3px 10px;border-radius:12px;background:var(--bg-card);border:1px solid var(--border);font-size:.72rem;color:var(--text2)">${c}</span>`).join('')}</div>`:''}
+      <div style="margin-top:10px;font-size:.75rem;color:var(--text3)">Unlock stamps by marking matches as Watched in the Scrapbook tab.</div>
+    </div>
+    <div class="passport-grid">
+      ${sorted.map((country,idx) => {
+        const seen=watched[country]||0, unlocked=seen>0, cd=COUNTRY_DATA[country], myRating=ratings[country]||0;
+        return `<div class="stamp${unlocked?' unlocked':' locked'}">
+          <span class="stamp-flag">${flag(country)}</span>
+          <div class="stamp-name">${country}</div>
+          ${cd?`<div class="stamp-capital">🏛 ${cd.capital}</div><div class="stamp-continent">${cd.continent}</div>`:''}
+          ${unlocked?`<div class="stamp-seen">👁 ${seen} match${seen>1?'es':''}</div>
+          <div class="star-row">${[1,2,3,4,5].map(i=>`<span class="pstar" onclick="setCountryRating(this,${idx},${i})">${i<=myRating?'⭐':'☆'}</span>`).join('')}</div>`
+          :`<div style="font-size:.65rem;color:var(--text3);margin-top:6px">Watch to unlock</div>`}
+        </div>`;
+      }).join('')}
+    </div>`;
+}
+
+// ── ACHIEVEMENTS ─────────────────────────────────────────────
+const ACHIEVEMENTS_DEF = [
+  { id:'first_pred', icon:'⚽', title:'First Kick!', desc:'Made your very first prediction',
+    check() { return MEMBERS.filter(w => Object.values(predCache).some(mp=>mp[w])); }
+  },
+  { id:'bullseye', icon:'🎯', title:'Bullseye!', desc:'Got an exact score prediction right (10 pts!)',
+    check() { return MEMBERS.filter(w => matches.some(m => calcPts((predCache[m.id]||{})[w],m)===10)); }
+  },
+  { id:'hat_trick', icon:'🎩', title:'Hat-trick Hero', desc:'3 correct winner predictions in a row',
+    check() {
+      return MEMBERS.filter(w => {
+        const res = matches.filter(m=>m.status==='FINISHED'&&(predCache[m.id]||{})[w])
+          .sort((a,b)=>new Date(a.utcDate)-new Date(b.utcDate))
+          .map(m=>(calcPts((predCache[m.id]||{})[w],m)||0)>=3);
+        for(let i=0;i<=res.length-3;i++) if(res[i]&&res[i+1]&&res[i+2]) return true;
+        return false;
+      });
+    }
+  },
+  { id:'on_fire', icon:'🔥', title:'On Fire!', desc:'5 correct winner predictions in a row',
+    check() {
+      return MEMBERS.filter(w => {
+        const res = matches.filter(m=>m.status==='FINISHED'&&(predCache[m.id]||{})[w])
+          .sort((a,b)=>new Date(a.utcDate)-new Date(b.utcDate))
+          .map(m=>(calcPts((predCache[m.id]||{})[w],m)||0)>=3);
+        for(let i=0;i<=res.length-5;i++) if(res.slice(i,i+5).every(Boolean)) return true;
+        return false;
+      });
+    }
+  },
+  { id:'team_player', icon:'🤝', title:'Team Player', desc:'All 3 family members predicted the same match',
+    check() { return matches.some(m=>MEMBERS.every(w=>(predCache[m.id]||{})[w]))?['family']:[]; }
+  },
+  { id:'knockout_expert', icon:'🏆', title:'Knockout Expert', desc:'Correct prediction in a knockout stage match',
+    check() {
+      return MEMBERS.filter(w => matches.some(m=>{
+        if(!KNOCKOUT.has(m.stage||'')&&m.stage!=='ROUND_OF_16') return false;
+        return (calcPts((predCache[m.id]||{})[w],m)||0)>=3;
+      }));
+    }
+  },
+  { id:'century', icon:'💯', title:'Century Club', desc:'Family total points reach 100',
+    check() { const {scores}=calcScores(); return MEMBERS.reduce((s,w)=>s+scores[w],0)>=100?['family']:[]; }
+  },
+  { id:'world_traveler', icon:'🌍', title:'World Traveler', desc:'10 countries stamped in your Passport',
+    check() { return Object.keys(getWatchedCountries()).length>=10?['family']:[]; }
+  },
+  { id:'globe_trotter', icon:'🗺️', title:'Globe Trotter', desc:'20 countries stamped in your Passport',
+    check() { return Object.keys(getWatchedCountries()).length>=20?['family']:[]; }
+  },
+  { id:'geo_genius', icon:'🗾', title:'Geography Genius', desc:'Countries from 4 different continents',
+    check() {
+      const conts=new Set(Object.keys(getWatchedCountries()).map(c=>COUNTRY_DATA[c]?.continent).filter(Boolean));
+      return conts.size>=4?['family']:[];
+    }
+  },
+  { id:'world_explorer', icon:'🌐', title:'World Explorer', desc:'Countries from all 5 major world regions',
+    check() {
+      const conts=new Set(Object.keys(getWatchedCountries()).map(c=>COUNTRY_DATA[c]?.continent).filter(Boolean));
+      return conts.size>=5?['family']:[];
+    }
+  },
+  { id:'night_owl', icon:'🦉', title:'Night Owl', desc:'Watched a match that started after 11 PM IST',
+    check() {
+      const sb=getScrapbook();
+      return matches.some(m=>sb[m.id]?.watched&&istHour(m.utcDate)>=23)?['family']:[];
+    }
+  },
+  { id:'memory_keeper', icon:'📖', title:'Memory Keeper', desc:'Wrote 5 match memories in the Scrapbook',
+    check() {
+      const sb=getScrapbook();
+      const n=Object.values(sb).filter(e=>e.watched&&(e.dad_comment||e.mom_comment||e.son_comment||e.fav_moment)).length;
+      return n>=5?['family']:[];
+    }
+  },
+];
+
+function renderAch() {
+  const el = document.getElementById('achOut');
+  const results = ACHIEVEMENTS_DEF.map(a => ({...a, winners:a.check()}));
+  const unlocked = results.filter(r=>r.winners.length>0).length;
+  el.innerHTML = `
+    <div class="card" style="margin-bottom:16px;display:flex;align-items:center;gap:16px">
+      <div style="font-size:2.2rem;font-weight:800;color:var(--gold)">${unlocked}/${results.length}</div>
+      <div><div style="font-weight:700">Achievements Unlocked</div><div style="font-size:.75rem;color:var(--text2)">Keep going — ${results.length-unlocked} more to earn!</div></div>
+    </div>
+    <div class="ach-grid">
+      ${results.map(a=>{
+        const on=a.winners.length>0;
+        const whoHtml=on?`<div class="ach-who">${a.winners.map(w=>w==='family'?`<span class="ach-badge fam">👨‍👩‍👦 Family</span>`:`<span class="ach-badge ${w.toLowerCase()}">${ICONS[w]} ${w}</span>`).join('')}</div>`:'';
+        return `<div class="ach-card${on?' unlocked':' locked'}">
+          <span class="ach-icon">${a.icon}</span>
+          <div class="ach-title">${a.title}</div>
+          <div class="ach-desc">${a.desc}</div>
+          ${whoHtml}
+        </div>`;
+      }).join('')}
+    </div>`;
 }
 
 init();
