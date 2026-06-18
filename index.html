@@ -737,7 +737,8 @@ function renderPreds(){
   if(!matches.length){el.innerHTML='<div class="empty"><div class="ei">📝</div><div>No data — hit Sync first.</div></div>';return;}
   const preds=predCache;
   const f=window._predFilter||'predict';
-  if(!window._expandedGroups) window._expandedGroups=new Set();
+  if(!window._toggledGroups) window._toggledGroups=new Set();
+  const todayIST=new Date().toLocaleDateString('en-CA',{timeZone:'Asia/Kolkata'});
 
   const list=matches.filter(m=>!['POSTPONED','CANCELLED','SUSPENDED'].includes(m.status));
   const grouped={};
@@ -766,8 +767,10 @@ function renderPreds(){
     if(!rows.length) continue;
     hasContent=true;
     const gid='pg_'+g.replace(/\W+/g,'_');
-    const collapsed=allDone&&!window._expandedGroups.has(g);
-    const clickable=allDone;
+    const hasToday=ms.some(m=>new Date(m.utcDate).toLocaleDateString('en-CA',{timeZone:'Asia/Kolkata'})===todayIST);
+    const toggled=window._toggledGroups.has(g);
+    const collapsed=toggled?hasToday:!hasToday;
+    const clickable=true;
     html+=`<div class="card" style="overflow-x:auto;padding:0;margin-bottom:12px">
       <div class="pred-group-hdr${clickable?' clickable':''}"${clickable?` onclick="togglePredGroup('${gid}','${g}')"`:''}">
         <span>${g}</span>
@@ -799,7 +802,7 @@ function togglePredGroup(gid,gname){
   const open=body.style.display==='none';
   body.style.display=open?'':'none';
   if(icon)icon.textContent=open?'▼':'▶';
-  if(open)window._expandedGroups.add(gname);else window._expandedGroups.delete(gname);
+  if(window._toggledGroups.has(gname))window._toggledGroups.delete(gname);else window._toggledGroups.add(gname);
 }
 function predRow(m,preds){
   const locked=isLocked(m.utcDate),done=m.status==='FINISHED',mp=preds[m.id]||{};
