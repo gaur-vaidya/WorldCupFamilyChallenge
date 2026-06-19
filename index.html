@@ -150,7 +150,10 @@ body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; backg
 
 /* Pages */
 .page { display:none; } .page.on { display:block; }
-.pg-title { font-size:1.25rem; font-weight:800; margin-bottom:18px; }
+.pg-title { font-size:1.25rem; font-weight:800; margin-bottom:18px; display:flex; align-items:center; gap:8px; }
+.pred-info-btn { background:none; border:none; cursor:pointer; font-size:.95rem; padding:2px 5px; border-radius:6px; line-height:1; color:var(--text2); }
+.pred-info-btn:hover { background:var(--bg-card2); }
+.pred-info-box { background:var(--bg-card); border:1px solid var(--border); border-radius:8px; padding:10px 14px; font-size:.8rem; color:var(--text2); margin-bottom:14px; line-height:1.7; }
 .empty { text-align:center; padding:40px; color:var(--text2); }
 .empty .ei { font-size:2.8rem; margin-bottom:10px; }
 
@@ -354,12 +357,12 @@ body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; backg
   </div>
 
   <div class="page" id="pg-predictions">
-    <div class="pg-title">📝 Predictions</div>
-    <div class="alert alert-warn">
+    <div class="pg-title">📝 Predictions <button class="pred-info-btn" onclick="togglePredInfo()" title="Scoring rules">ℹ️</button></div>
+    <div class="pred-info-box" id="predInfoBox" style="display:none">
       Predictions lock <strong style="color:var(--gold)">15 min</strong> before kickoff &nbsp;·&nbsp;
-      Correct Winner <strong style="color:var(--gold)">3pts</strong> &nbsp;·&nbsp;
-      Correct Diff <strong style="color:var(--gold)">+2pts</strong> &nbsp;·&nbsp;
-      Exact Score <strong style="color:var(--gold)">+5pts</strong>
+      Correct Winner <strong style="color:var(--gold)">3 pts</strong> &nbsp;·&nbsp;
+      Correct Diff <strong style="color:var(--gold)">+2 pts</strong> &nbsp;·&nbsp;
+      Exact Score <strong style="color:var(--gold)">+5 pts</strong>
     </div>
     <div id="predsOut"></div>
   </div>
@@ -796,6 +799,7 @@ function renderPreds(){
 }
 function setPredFilter(f){window._predFilter=f;renderPreds();}
 function setPredOnlyUs(v){window._predOnlyUs=v;renderPreds();}
+function togglePredInfo(){const b=document.getElementById('predInfoBox');if(b)b.style.display=b.style.display==='none'?'':'none';}
 function togglePredGroup(gid,gname){
   const body=document.getElementById(gid),icon=document.getElementById(gid+'_icon');
   if(!body)return;
