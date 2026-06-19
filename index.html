@@ -1510,6 +1510,76 @@ const ACHIEVEMENTS_DEF = [
       return n>=5?['family']:[];
     }
   },
+  { id:'draw_specialist', icon:'🎲', title:'Draw Specialist', desc:'Correctly predicted a draw result',
+    check() {
+      return MEMBERS.filter(w => matches.some(m => {
+        const pred=(predCache[m.id]||{})[w]; if(!pred) return false;
+        const ph=+pred.homeScore, pa=+pred.awayScore; if(ph!==pa) return false;
+        return (calcPts(pred,m)||0)>=3;
+      }));
+    }
+  },
+  { id:'sniper', icon:'🏹', title:'Sniper', desc:'Got 3 exact score predictions right (30 pts!)',
+    check() {
+      return MEMBERS.filter(w => matches.filter(m=>calcPts((predCache[m.id]||{})[w],m)===10).length>=3);
+    }
+  },
+  { id:'committed_fan', icon:'📊', title:'Committed Fan', desc:'Made 20+ predictions across the tournament',
+    check() {
+      return MEMBERS.filter(w => Object.values(predCache).filter(mp=>mp[w]).length>=20);
+    }
+  },
+  { id:'comeback_kid', icon:'💪', title:'Comeback Kid', desc:'Got a correct prediction right after 3 wrong ones in a row',
+    check() {
+      return MEMBERS.filter(w => {
+        const res=matches.filter(m=>m.status==='FINISHED'&&(predCache[m.id]||{})[w])
+          .sort((a,b)=>new Date(a.utcDate)-new Date(b.utcDate))
+          .map(m=>(calcPts((predCache[m.id]||{})[w],m)||0)>=3);
+        for(let i=0;i<=res.length-4;i++) if(!res[i]&&!res[i+1]&&!res[i+2]&&res[i+3]) return true;
+        return false;
+      });
+    }
+  },
+  { id:'half_century', icon:'🥇', title:'Half Century', desc:'Reached 50 points on the leaderboard',
+    check() {
+      const {scores}=calcScores();
+      return MEMBERS.filter(w=>scores[w]>=50);
+    }
+  },
+  { id:'early_risers', icon:'🌅', title:'Early Risers', desc:'Watched a match that kicked off before 9 AM IST',
+    check() {
+      const sb=getScrapbook();
+      return matches.some(m=>sb[m.id]?.watched&&istHour(m.utcDate)<9)?['family']:[];
+    }
+  },
+  { id:'epic_storyteller', icon:'✍️', title:'Epic Storyteller', desc:'Wrote 10 match memories in the Scrapbook',
+    check() {
+      const sb=getScrapbook();
+      const n=Object.values(sb).filter(e=>e.watched&&(e.dad_comment||e.mom_comment||e.son_comment||e.fav_moment)).length;
+      return n>=10?['family']:[];
+    }
+  },
+  { id:'must_watch_fans', icon:'⭐', title:'Must-Watch Fans', desc:'Watched a 5-star "Must Watch" rated match together',
+    check() {
+      const sb=getScrapbook();
+      return matches.some(m=>rate(m).stars>=5&&sb[m.id]?.watched)?['family']:[];
+    }
+  },
+  { id:'all_voices', icon:'💬', title:'All Voices', desc:'All 3 family members commented on the same match memory',
+    check() {
+      return Object.values(getScrapbook()).some(e=>e.dad_comment&&e.mom_comment&&e.son_comment)?['family']:[];
+    }
+  },
+  { id:'united_front', icon:'🤜', title:'United Front', desc:'Family all predicted the same outcome for 5+ matches',
+    check() {
+      const same=matches.filter(m=>{
+        const mp=predCache[m.id]||{};
+        const outcomes=MEMBERS.map(w=>{const p=mp[w];if(!p)return null;const ph=+p.homeScore,pa=+p.awayScore;return ph>pa?'H':ph<pa?'A':'D';});
+        return outcomes.every(Boolean)&&new Set(outcomes).size===1;
+      });
+      return same.length>=5?['family']:[];
+    }
+  },
 ];
 
 function renderAch() {
