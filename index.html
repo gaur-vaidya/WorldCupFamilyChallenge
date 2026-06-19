@@ -598,6 +598,7 @@ async function fetchMatches(force=false) {
 // ── TIME ─────────────────────────────────────────────────────
 const IST = 'Asia/Kolkata';
 function fmtTime(utc)  { return new Date(utc).toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit',hour12:true,timeZone:IST}); }
+function fmtDay(utc)   { return new Date(utc).toLocaleDateString('en-IN',{day:'numeric',month:'short',timeZone:IST}); }
 function fmtDate(utc)  { return new Date(utc).toLocaleString('en-IN',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit',hour12:true,timeZone:IST}); }
 function isToday(utc)  { return new Date(utc).toLocaleDateString('en-IN',{timeZone:IST}) === new Date().toLocaleDateString('en-IN',{timeZone:IST}); }
 function isLocked(utc) { return Date.now() >= new Date(utc).getTime()-15*60*1000; }
@@ -661,7 +662,7 @@ function matchCard(m) {
   if(done && hasScore) sc=`<div class="mc-score">${ft.home} - ${ft.away}</div>`;
   else if(done) sc=`<div class="mc-score" style="font-size:.9rem;color:var(--text3)">⏳</div>`;
   else if(live) sc=`<div class="mc-score live">${ft?.home??0} - ${ft?.away??0}</div>`;
-  else sc=`<div class="mc-time">${fmtTime(m.utcDate)} IST</div>`;
+  else sc=`<div class="mc-time"><div style="font-size:.65rem;color:var(--text3);margin-bottom:1px">${fmtDay(m.utcDate)}</div>${fmtTime(m.utcDate)} IST</div>`;
   const bc=live?'s-live':done?'s-ft':'s-sched', bt=live?(m.status==='PAUSED'?'⏸ HT':'🔴 Live'):done?(hasScore?'FT':'Score pending'):fmtTime(m.utcDate)+' IST';
   const watched = done && getScrapbook()[m.id]?.watched;
   const logBtn = done ? `<button class="log-mem-btn" onclick="goScrapbook(${m.id})">📖 Log Memory${watched?' · ✓ Watched':''}</button>` : '';
