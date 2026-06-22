@@ -831,7 +831,7 @@ function predRow(m,preds){
       if(done) return `<td ${dw}>${p?`<span class="pred-done">${p.homeScore}–${p.awayScore}</span>${pts!==null?`<span class="pts-badge" style="display:block;margin:4px auto 0;width:fit-content">+${pts}</span>`:''}`:'<span class="pred-locked">—</span>'}</td>`;
       if(locked) return `<td ${dw}>${p?`<span class="pred-done" style="color:var(--text2)">${p.homeScore}–${p.awayScore} 🔒</span>`:'<span class="pred-locked">🔒</span>'}</td>`;
       const ph=p?.homeScore??'',pa=p?.awayScore??'';
-      return `<td ${dw}><div class="pred-inputs"><input type="number" min="0" max="20" class="score-inp" value="${ph}" placeholder="?" oninput="savePred(${m.id},'${w}','home',this.value)"><span class="pred-sep">–</span><input type="number" min="0" max="20" class="score-inp" value="${pa}" placeholder="?" oninput="savePred(${m.id},'${w}','away',this.value)"></div></td>`;
+      return `<td ${dw}><div class="pred-inputs"><input type="number" min="0" max="20" class="score-inp" inputmode="numeric" value="${ph}" placeholder="?" data-mid="${m.id}" data-who="${w}" data-side="home" oninput="onPredInput(this)" onfocus="this.select()"><span class="pred-sep">–</span><input type="number" min="0" max="20" class="score-inp" inputmode="numeric" value="${pa}" placeholder="?" data-mid="${m.id}" data-who="${w}" data-side="away" oninput="onPredInput(this)" onfocus="this.select()"></div></td>`;
     }).join('')}
   </tr>`;
 }
@@ -840,6 +840,20 @@ function savePred(matchId,who,side,val){
   if(!predCache[matchId][who]) predCache[matchId][who]={};
   predCache[matchId][who][side==='home'?'homeScore':'awayScore']=parseInt(val)||0;
   writePredictions();
+}
+function onPredInput(el){
+  const mid=+el.dataset.mid,who=el.dataset.who,side=el.dataset.side;
+  const val=el.value;
+  savePred(mid,who,side,val);
+  if(val===''||val.length===0) return;
+  if(side==='home'){
+    const away=el.closest('.pred-inputs').querySelector('[data-side="away"]');
+    if(away){away.focus();away.select();}
+  } else {
+    const all=[...document.querySelectorAll('#pg-predictions .score-inp')];
+    const idx=all.indexOf(el);
+    if(idx>=0&&idx+1<all.length){all[idx+1].focus();all[idx+1].select();}
+  }
 }
 
 // ── LEADERBOARD ──────────────────────────────────────────────
