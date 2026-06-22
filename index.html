@@ -442,6 +442,7 @@ function listenPredictions() {
     if (snap.metadata.hasPendingWrites) return; // our own write — skip re-render
     predCache = snap.data()?.data || {};
     set('predictions_local', predCache); // keep local backup
+    if (document.activeElement?.classList.contains('score-inp')) return; // user is typing — don't blow away focus
     render(curPage);
   }, err => {
     console.warn('Firestore listener:', err);
