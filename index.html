@@ -427,9 +427,12 @@ firebase.initializeApp({
 });
 const db       = firebase.firestore();
 const PRED_DOC = db.collection('wcfc').doc('gaurvaidya_fam_wc2026_x7q');
+const QUIZ_DOC = db.collection('wcfc').doc('gaurvaidya_fam_wc2026_quiz');
 
 let predCache = {};  // live in-memory predictions, kept current by onSnapshot
 let _predTimer;      // debounce Firestore writes
+let quizCache = {};  // live in-memory quiz answers, kept current by onSnapshot
+let _quizTimer;      // debounce Firestore writes
 
 function setLiveDot(on) {
   const el = document.getElementById('liveDot');
@@ -456,6 +459,22 @@ function writePredictions() {
   _predTimer = setTimeout(() => {
     set('predictions_local', predCache);
     PRED_DOC.set({ data: predCache }).catch(e => console.warn('Firestore write:', e));
+  }, 600);
+}
+
+function listenQuiz() {
+  QUIZ_DOC.onSnapshot({ includeMetadataChanges: true }, snap => {
+    if (snap.metadata.hasPendingWrites) return;
+    const remote = snap.data()?.data;
+    if (!remote) { writeQuiz(); return; } // doc new — seed from localStorage migration
+    quizCache = remote;
+    if (curPage === 'quiz') renderQuiz();
+  }, err => console.warn('Firestore quiz:', err));
+}
+function writeQuiz() {
+  clearTimeout(_quizTimer);
+  _quizTimer = setTimeout(() => {
+    QUIZ_DOC.set({ data: quizCache }).catch(e => console.warn('Firestore quiz write:', e));
   }, 600);
 }
 
@@ -948,9 +967,19 @@ setInterval(async()=>{
 
 // ── INIT ─────────────────────────────────────────────────────
 async function init(){
-  // Start Firestore real-time listener immediately
+  // Start Firestore real-time listeners immediately
   predCache = get('predictions_local', {});
   listenPredictions();
+
+  // Migrate existing quiz answers from localStorage so Firestore seed is complete
+  const _allLocal = load();
+  Object.entries(_allLocal).forEach(([k, v]) => {
+    if (k.startsWith('quiz_') && typeof v === 'object') quizCache[k] = v;
+  });
+  // quiz_base = fallback totals for fresh installs with no local quiz history
+  const _hasLocalQuiz = Object.keys(quizCache).some(k => k.startsWith('quiz_'));
+  if (!_hasLocalQuiz) quizCache.quiz_base = { Dad: 4, Mom: 7, Son: 3 };
+  listenQuiz();
 
   const key=get('apiKey','');
   if(!key){
@@ -1002,20 +1031,20 @@ function getQuizDateKey() {
   return 'quiz_' + new Date().toLocaleDateString('en-CA', { timeZone: IST }); // YYYY-MM-DD
 }
 
-function getQuizAnswers() { return get(getQuizDateKey(), {}); }
+function getQuizAnswers() { return quizCache[getQuizDateKey()] || {}; }
 
 function saveQuizAnswer(qIdx, who, ansIdx, correct) {
   const key = getQuizDateKey();
-  const d = get(key, {});
-  if (!d[`q${qIdx}`]) d[`q${qIdx}`] = {};
-  d[`q${qIdx}`][who] = { ans: ansIdx, correct };
-  set(key, d);
+  if (!quizCache[key]) quizCache[key] = {};
+  if (!quizCache[key][`q${qIdx}`]) quizCache[key][`q${qIdx}`] = {};
+  quizCache[key][`q${qIdx}`][who] = { ans: ansIdx, correct };
+  writeQuiz();
 }
 
 function getQuizTotals() {
-  const all = load();
   const totals = { Dad: 0, Mom: 0, Son: 0 };
-  Object.entries(all).forEach(([k, v]) => {
+  Object.entries(quizCache).forEach(([k, v]) => {
+    if (k === 'quiz_base') { MEMBERS.forEach(w => { totals[w] += v[w] || 0; }); return; }
     if (!k.startsWith('quiz_') || typeof v !== 'object') return;
     Object.values(v).forEach(qa => {
       MEMBERS.forEach(w => { if (qa[w]?.correct) totals[w]++; });
