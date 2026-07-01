@@ -1773,8 +1773,8 @@ function renderAch() {
       <div style="font-size:2.2rem;font-weight:800;color:var(--gold)">${unlocked}/${results.length}</div>
       <div><div style="font-weight:700">Achievements Unlocked</div><div style="font-size:.75rem;color:var(--text2)">Keep going — ${results.length-unlocked} more to earn!</div></div>
     </div>
-    <div class="ach-list">${main.map(rowHtml).join('')}</div>
-    ${allDoneSection}`;
+    ${allDoneSection}
+    <div class="ach-list" style="margin-top:${allDone.length?'16px':'0'}">${main.map(rowHtml).join('')}</div>`;
 }
 
 init();
