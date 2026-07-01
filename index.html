@@ -1738,25 +1738,43 @@ function renderAch() {
   const el = document.getElementById('achOut');
   const results = ACHIEVEMENTS_DEF.map(a => ({...a, winners:a.check()}));
   const unlocked = results.filter(r=>r.winners.length>0).length;
+
+  const isAllDone = r => r.winners.includes('family') || (r.winners.length===3 && MEMBERS.every(m=>r.winners.includes(m)));
+  const allDone = results.filter(isAllDone);
+  const main   = results.filter(r=>!isAllDone(r));
+
+  const rowHtml = a => {
+    const on = a.winners.length > 0;
+    const whoHtml = on ? `<div class="ach-who">${a.winners.map(w=>w==='family'?`<span class="ach-badge fam">👨‍👩‍👦 Family</span>`:`<span class="ach-badge ${w.toLowerCase()}">${ICONS[w]} ${w}</span>`).join('')}</div>` : '';
+    return `<div class="ach-row${on?' unlocked':' locked'}">
+      <div class="ach-row-icon">${a.icon}</div>
+      <div class="ach-row-body">
+        <div class="ach-row-title">${a.title}</div>
+        <div class="ach-row-desc">${a.desc}</div>
+      </div>
+      ${whoHtml}
+    </div>`;
+  };
+
+  const allDoneSection = allDone.length === 0 ? '' : `
+    <div style="margin-top:16px">
+      <button onclick="var d=this.nextElementSibling;d.hidden=!d.hidden;this.querySelector('.ach-chev').style.transform=d.hidden?'':'rotate(180deg)'"
+        style="width:100%;background:none;border:1px solid var(--border);border-radius:10px;padding:10px 14px;cursor:pointer;display:flex;align-items:center;justify-content:space-between;color:var(--text2);font-size:.85rem;font-weight:600">
+        <span>✅ Everyone earned this (${allDone.length})</span>
+        <span class="ach-chev" style="display:inline-block;transition:transform .2s">▼</span>
+      </button>
+      <div hidden>
+        <div class="ach-list" style="margin-top:8px">${allDone.map(rowHtml).join('')}</div>
+      </div>
+    </div>`;
+
   el.innerHTML = `
     <div class="card" style="margin-bottom:16px;display:flex;align-items:center;gap:16px">
       <div style="font-size:2.2rem;font-weight:800;color:var(--gold)">${unlocked}/${results.length}</div>
       <div><div style="font-weight:700">Achievements Unlocked</div><div style="font-size:.75rem;color:var(--text2)">Keep going — ${results.length-unlocked} more to earn!</div></div>
     </div>
-    <div class="ach-list">
-      ${results.map(a=>{
-        const on=a.winners.length>0;
-        const whoHtml=on?`<div class="ach-who">${a.winners.map(w=>w==='family'?`<span class="ach-badge fam">👨‍👩‍👦 Family</span>`:`<span class="ach-badge ${w.toLowerCase()}">${ICONS[w]} ${w}</span>`).join('')}</div>`:'';
-        return `<div class="ach-row${on?' unlocked':' locked'}">
-          <div class="ach-row-icon">${a.icon}</div>
-          <div class="ach-row-body">
-            <div class="ach-row-title">${a.title}</div>
-            <div class="ach-row-desc">${a.desc}</div>
-          </div>
-          ${whoHtml}
-        </div>`;
-      }).join('')}
-    </div>`;
+    <div class="ach-list">${main.map(rowHtml).join('')}</div>
+    ${allDoneSection}`;
 }
 
 init();
